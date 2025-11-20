@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>产品日记 · 毛毛的产品日记</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #111827;
+      --text-sub: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #2563eb;
+      --border-subtle: #e5e7eb;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.12);
+      --content-width: 1120px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui,
+        -system-ui, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top left, #e5e7eb 0, #f8fafc 38%, #f9fafb 100%);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .page-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--content-width);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* 顶部导航 */
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(16px);
+      background: linear-gradient(90deg, #e4f0ff, #f3ecff);
+      border-bottom: 1px solid rgba(199, 210, 254, 0.9);
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+    }
+
+    .site-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(147, 197, 253, 0.35), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(196, 181, 253, 0.35), transparent 55%);
+      opacity: 1;
+      mix-blend-mode: soft-light;
+    }
+
+    .nav-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+    }
+
+    .brand {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .brand span {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-sub);
+      margin-left: 8px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .nav-link {
+      color: var(--text-sub);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    main {
+      flex: 1;
+      padding-bottom: 18px;
+    }
+
+    section {
+      padding: 18px 0;
+    }
+
+    /* 专栏头部 */
+
+    .column-hero {
+      padding-top: 18px;
+    }
+
+    .column-hero-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 22px;
+      padding: 22px 22px 18px;
+      border: 1px solid rgba(191, 219, 254, 0.9);
+      background:
+        radial-gradient(circle at 0% 0%, #eff6ff 0, #ffffff 55%, transparent 78%),
+        radial-gradient(circle at 100% 100%, #dbeafe 0, #e0f2fe 40%, #f9fafb 100%);
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.3fr);
+      gap: 20px;
+      align-items: center;
+    }
+
+    .column-hero-main {
+      position: relative;
+      z-index: 1;
+    }
+
+    .column-eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(37, 99, 235, 0.9);
+      margin-bottom: 8px;
+    }
+
+    .column-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .column-subtitle {
+      font-size: 14px;
+      color: var(--text-sub);
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+
+    .column-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .pill {
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.12);
+      color: rgba(30, 64, 175, 0.95);
+    }
+
+    .column-hero-media {
+      position: relative;
+      height: 140px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(191, 219, 254, 0.9);
+      background-image: url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80");
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.32);
+    }
+
+    .column-hero-media::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.4), transparent 55%);
+    }
+
+    .column-hero-media-caption {
+      position: absolute;
+      left: 14px;
+      bottom: 12px;
+      right: 14px;
+      font-size: 12px;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1;
+    }
+
+    /* 文章列表 */
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .section-head-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .filter-pills {
+      display: inline-flex;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .filter-pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(209, 213, 219, 0.9);
+      color: var(--text-sub);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .posts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .post-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.6fr);
+      gap: 10px;
+    }
+
+    .post-card-lg {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 11px;
+      border-radius: 14px;
+      border: 1px solid rgba(209, 213, 219, 0.9);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+      cursor: pointer;
+      transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease,
+        background 0.18s ease;
+    }
+
+    .post-card-lg:hover {
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.14);
+      transform: translateY(-1px);
+      border-color: rgba(148, 163, 184, 0.9);
+      background: #f9fafb;
+    }
+
+    .post-thumb {
+      width: 110px;
+      height: 72px;
+      border-radius: 12px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      flex-shrink: 0;
+    }
+
+    .post-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .post-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .post-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .post-tag {
+      font-size: 11px;
+      color: rgba(37, 99, 235, 0.9);
+    }
+
+    footer {
+      border-top: 1px solid rgba(229, 231, 235, 0.8);
+      padding: 16px 0 22px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 960px) {
+      .column-hero-card {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .column-hero-media {
+        height: 160px;
+      }
+
+      .post-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <header class="site-header">
+    <div class="container nav-inner">
+      <div class="brand">
+        <a href="./index.html">毛毛的产品日记</a>
+      </div>
+      <div class="nav-actions">
+        <a href="./index.html" class="nav-link">返回主页</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 专栏头部 -->
+    <section class="column-hero">
+      <div class="container">
+        <div class="column-hero-card">
+          <div class="column-hero-main">
+            <div class="column-eyebrow">COLUMN</div>
+            <h1 class="column-title">产品日记 Product Diary</h1>
+            <p class="column-subtitle">
+              把每天做产品时的思考、犹豫和小进步都记下来。这里不追求结论，
+              更像一份「过程记录」，以后回头看，可以看到自己一路是怎么走过来的。
+            </p>
+            <div class="column-meta">
+              <span class="pill">连载中 · 已发布 10 篇</span>
+              <span>更新频率：随缘但会尽量保持</span>
+            </div>
+          </div>
+          <div class="column-hero-media">
+            <div class="column-hero-media-caption">
+              <span>这一刻的桌面，也是产品日记的一部分</span>
+              <span>2025 · Winter</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 文章列表 -->
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <div class="section-head-main">
+            <div class="section-title">最近更新</div>
+          </div>
+        </div>
+
+        <div class="posts-list">
+          <div class="post-row">
+            <article class="post-card-lg">
+              <div class="post-thumb" style="background-image:url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="post-content">
+                <h2 class="post-title">【09】这一周，我在忙些什么</h2>
+                <div class="post-meta">
+                  <span>2025-02-10</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="post-card-lg">
+              <div class="post-thumb" style="background-image:url('https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="post-content">
+                <h2 class="post-title">【08】一个从零开始的小功能</h2>
+                <div class="post-meta">
+                  <span>2025-02-05</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="post-row">
+            <article class="post-card-lg">
+              <div class="post-thumb" style="background-image:url('https://images.unsplash.com/photo-1522202195461-41a6521dcd87?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="post-content">
+                <h2 class="post-title">【07】和用户聊完的一些灵感</h2>
+                <div class="post-meta">
+                  <span>2025-02-01</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="post-card-lg">
+              <div class="post-thumb" style="background-image:url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="post-content">
+                <h2 class="post-title">【06】从一次需求评审里学到的事</h2>
+                <div class="post-meta">
+                  <span>2025-01-28</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="post-row">
+            <article class="post-card-lg">
+              <div class="post-thumb" style="background-image:url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="post-content">
+                <h2 class="post-title">【05】写给团队看的版本小记</h2>
+                <div class="post-meta">
+                  <span>2025-01-25</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="post-card-lg">
+              <div class="post-thumb" style="background-image:url('https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="post-content">
+                <h2 class="post-title">【04】当需求与用户声音不一致时</h2>
+                <div class="post-meta">
+                  <span>2025-01-30</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="post-row">
+            <article class="post-card-lg">
+              <div class="post-thumb" style="background-image:url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="post-content">
+                <h2 class="post-title">【03】写给未来自己的产品备忘录</h2>
+                <div class="post-meta">
+                  <span>2025-01-22</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="post-card-lg">
+              <div class="post-thumb" style="background-image:url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="post-content">
+                <h2 class="post-title">【02】版本上线前的最后 48 小时</h2>
+                <div class="post-meta">
+                  <span>2025-01-15</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="post-row">
+            <article class="post-card-lg">
+              <div class="post-thumb" style="background-image:url('https://images.unsplash.com/photo-1522202195461-41a6521dcd87?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="post-content">
+                <h2 class="post-title">【01】这一周的产品碎片</h2>
+                <div class="post-meta">
+                  <span>2025-01-07</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="post-card-lg">
+              <div class="post-thumb" style="background-image:url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="post-content">
+                <h2 class="post-title">【00】起点 · 给自己的一块写字地</h2>
+                <div class="post-meta">
+                  <span>2025-01-01</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>© 2025 写给自己的产品日记</div>
+      <div class="footer-links">
+        <span>以后可以放：小红书 / GitHub</span>
+      </div>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
+
+

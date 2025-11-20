@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>毛毛的产品日记</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #111827;
+      --text-sub: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --border-subtle: #e5e7eb;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.12);
+      --content-width: 1120px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui,
+        -system-ui, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top left, #e5e7eb 0, #f8fafc 38%, #f9fafb 100%);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .page-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--content-width);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* 顶部导航 */
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(16px);
+      background: linear-gradient(90deg, #e4f0ff, #f3ecff);
+      border-bottom: 1px solid rgba(199, 210, 254, 0.9);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+      transition: transform 0.42s ease, opacity 0.42s ease, box-shadow 0.2s ease;
+    }
+
+    .site-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(147, 197, 253, 0.35), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(196, 181, 253, 0.35), transparent 55%);
+      opacity: 1;
+      mix-blend-mode: soft-light;
+    }
+
+    .site-header.is-hidden {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: none;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .brand span {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-sub);
+      margin-left: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 14px;
+    }
+
+    .nav-link {
+      position: relative;
+      color: var(--text-sub);
+      padding-bottom: 4px;
+      cursor: pointer;
+    }
+
+    .nav-link.is-active {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .nav-link.is-active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 18px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 999px;
+    }
+
+    /* 主体 */
+
+    main {
+      flex: 1;
+    }
+
+    section {
+      padding: 18px 0;
+    }
+
+    /* 首屏 Hero */
+
+    .hero {
+      padding-top: 18px;
+      padding-bottom: 18px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2.3fr);
+      gap: 56px;
+      align-items: center;
+    }
+
+    .hero-eyebrow {
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 40px;
+      line-height: 1.12;
+      letter-spacing: 0.02em;
+      margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+      font-size: 18px;
+      color: var(--text-sub);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .hero-body {
+      font-size: 14px;
+      color: var(--text-sub);
+      line-height: 1.8;
+      max-width: 420px;
+      margin-bottom: 28px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px 16px;
+    }
+
+    .btn-primary {
+      padding: 9px 18px;
+      border-radius: 999px;
+      background: #111827;
+      color: #f9fafb;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+    }
+
+    .btn-primary span {
+      font-size: 16px;
+      transform: translateY(0.5px);
+    }
+
+    .btn-ghost {
+      font-size: 13px;
+      color: var(--text-sub);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-ghost span {
+      font-size: 15px;
+      transform: translateY(1px);
+    }
+
+    .hero-note {
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .hero-banner {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 21 / 9;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background-color: #020617;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(-100px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+
+    .hero-banner.is-entered {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hero-slider {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1.02);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .hero-slide.is-active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .hero-slide::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top right, rgba(15, 23, 42, 0.65), transparent 55%);
+    }
+
+    .hero-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f97316;
+      color: #fff7ed;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      transition: transform 0.25s ease, opacity 0.25s ease, background 0.25s ease,
+        color 0.25s ease;
+    }
+
+    .hero-badge--orange {
+      background: #f97316;
+      color: #fff7ed;
+    }
+
+    .hero-badge--violet {
+      background: #4f46e5;
+      color: #e0e7ff;
+    }
+
+    .hero-badge--green {
+      background: #16a34a;
+      color: #dcfce7;
+    }
+
+    .hero-banner-title {
+      position: absolute;
+      left: 24px;
+      bottom: 36px;
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      color: #f9fafb;
+      text-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    .hero-dots {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 2;
+    }
+
+    .hero-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 250, 252, 0.8);
+      background: rgba(15, 23, 42, 0.4);
+      padding: 0;
+      cursor: pointer;
+      outline: none;
+      transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .hero-dot.is-active {
+      background: #f9fafb;
+      border-color: #f9fafb;
+      transform: scale(1.05);
+    }
+
+    /* 通用区块标题 */
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 24px;
+      gap: 16px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .section-subtitle {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .section-link {
+      font-size: 13px;
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    /* 最新文章列表 */
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px 20px;
+    }
+
+    .post-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      padding: 14px 100px 16px 14px;
+      border: 1px solid var(--border-subtle);
+      transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      cursor: pointer;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .post-card:hover {
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+      transform: translateY(-2px);
+      border-color: rgba(148, 163, 184, 0.7);
+      background: #f9fafb;
+    }
+
+    .post-card.is-active {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12);
+    }
+
+    .category-list {
+      margin-top: 14px;
+      padding: 14px 16px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background:
+        radial-gradient(circle at top left, #f3f4f6 0, #ffffff 40%, transparent 70%),
+        radial-gradient(circle at bottom right, #f3f4f6 0, #ffffff 40%, transparent 70%);
+      box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    .category-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .category-list-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .category-list-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .category-list-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--accent);
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.06);
+    }
+
+    .category-list-more-icon {
+      font-size: 12px;
+      transform: translateY(0.5px);
+    }
+
+    .category-list-items {
+      list-style: none;
+      margin: 0;
+      padding: 10px 0 2px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 12px;
+    }
+
+    .category-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.98);
+      border: 1px solid rgba(229, 231, 235, 0.9);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+      cursor: pointer;
+      transition: box-shadow 0.16s ease, transform 0.16s ease, border-color 0.16s ease,
+        background 0.16s ease;
+    }
+
+    .category-item:hover {
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.16);
+      transform: translateY(-1px);
+      border-color: rgba(148, 163, 184, 0.9);
+      background: rgba(248, 250, 252, 0.98);
+    }
+
+    .category-item-thumb {
+      width: 104px;
+      height: 68px;
+      border-radius: 12px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      flex-shrink: 0;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+    }
+
+    .category-item-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .category-item-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .category-item-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .category-list--diary {
+      border-color: rgba(59, 130, 246, 0.35);
+      background:
+        radial-gradient(circle at top left, rgba(219, 234, 254, 0.9) 0, #ffffff 40%, transparent 70%),
+        radial-gradient(circle at bottom right, rgba(219, 234, 254, 0.9) 0, #ffffff 40%, transparent 70%);
+    }
+
+    .category-list--diary .category-list-more {
+      background: rgba(59, 130, 246, 0.06);
+      color: #1d4ed8;
+    }
+
+    .category-list--experience {
+      border-color: rgba(16, 185, 129, 0.35);
+      background:
+        radial-gradient(circle at top left, rgba(187, 247, 208, 0.9) 0, #ffffff 40%, transparent 70%),
+        radial-gradient(circle at bottom right, rgba(187, 247, 208, 0.9) 0, #ffffff 40%, transparent 70%);
+    }
+
+    .category-list--experience .category-list-more {
+      background: rgba(16, 185, 129, 0.06);
+      color: #059669;
+    }
+
+    .category-list--work {
+      border-color: rgba(244, 114, 182, 0.4);
+      background:
+        radial-gradient(circle at top left, rgba(251, 207, 232, 0.9) 0, #ffffff 40%, transparent 70%),
+        radial-gradient(circle at bottom right, rgba(251, 207, 232, 0.9) 0, #ffffff 40%, transparent 70%);
+    }
+
+    .category-list--work .category-list-more {
+      background: rgba(244, 114, 182, 0.06);
+      color: #db2777;
+    }
+
+    .category-list--notes {
+      border-color: rgba(251, 191, 36, 0.4);
+      background:
+        radial-gradient(circle at top left, rgba(254, 243, 199, 0.9) 0, #ffffff 40%, transparent 70%),
+        radial-gradient(circle at bottom right, rgba(254, 243, 199, 0.9) 0, #ffffff 40%, transparent 70%);
+    }
+
+    .category-list--notes .category-list-more {
+      background: rgba(245, 158, 11, 0.06);
+      color: #d97706;
+    }
+
+    /* 不同栏目卡片用不同的配色 */
+    .post-card:nth-child(1) {
+      border-color: rgba(59, 130, 246, 0.35);
+      background: linear-gradient(135deg, #eff6ff, #ffffff);
+    }
+
+    .post-card:nth-child(2) {
+      border-color: rgba(16, 185, 129, 0.35);
+      background: linear-gradient(135deg, #ecfdf5, #ffffff);
+    }
+
+    .post-card:nth-child(3) {
+      border-color: rgba(244, 114, 182, 0.35);
+      background: linear-gradient(135deg, #fdf2ff, #ffffff);
+    }
+
+    .post-card:nth-child(4) {
+      border-color: rgba(251, 191, 36, 0.4);
+      background: linear-gradient(135deg, #fffbeb, #ffffff);
+    }
+
+    .posts-grid .post-card:nth-child(1).is-active {
+      border-color: rgba(59, 130, 246, 0.65);
+      background: linear-gradient(135deg, #dbeafe, #ffffff);
+      box-shadow: 0 16px 40px rgba(37, 99, 235, 0.22);
+    }
+
+    .posts-grid .post-card:nth-child(2).is-active {
+      border-color: rgba(16, 185, 129, 0.65);
+      background: linear-gradient(135deg, #bbf7d0, #ffffff);
+      box-shadow: 0 16px 40px rgba(16, 185, 129, 0.22);
+    }
+
+    .posts-grid .post-card:nth-child(3).is-active {
+      border-color: rgba(244, 114, 182, 0.65);
+      background: linear-gradient(135deg, #fbcfe8, #ffffff);
+      box-shadow: 0 16px 40px rgba(244, 114, 182, 0.22);
+    }
+
+    .posts-grid .post-card:nth-child(4).is-active {
+      border-color: rgba(251, 191, 36, 0.75);
+      background: linear-gradient(135deg, #fef3c7, #ffffff);
+      box-shadow: 0 16px 40px rgba(251, 191, 36, 0.24);
+    }
+
+    .post-card-media {
+      position: absolute;
+      right: -10px;
+      bottom: -16px;
+      width: 80px;
+      height: 64px;
+      border-radius: 18px;
+      background-size: cover;
+      background-position: center;
+      transform: rotate(-10deg);
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.5);
+      pointer-events: none;
+    }
+
+    .post-card-media--diary {
+      background-image: url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80");
+    }
+
+    .post-card-media--experience {
+      background-image: url("https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80");
+    }
+
+    .post-card-media--work {
+      background-image: url("https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=600&q=80");
+    }
+
+    .post-card-media--notes {
+      background-image: url("https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80");
+    }
+
+    .post-tag {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .post-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .post-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* 实验室 / 项目 */
+
+    .lab-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .lab-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: var(--radius-md);
+      padding: 16px 18px 18px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .lab-name {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .lab-desc {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .lab-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #ecfdf3;
+      color: #16a34a;
+    }
+
+    /* 关于我 */
+
+    .about-card {
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at top left, #f5f5f4 0, #fefce8 45%, #fee2e2 100%);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px 20px;
+      border: 1px solid rgba(209, 213, 219, 0.9);
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) auto;
+      gap: 20px;
+      align-items: center;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .about-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 110% -10%, rgba(248, 113, 113, 0.24), transparent 58%);
+      pointer-events: none;
+      mix-blend-mode: soft-light;
+    }
+
+    .about-main {
+      position: relative;
+      z-index: 1;
+    }
+
+    .avatar {
+      position: relative;
+      z-index: 1;
+      width: 76px;
+      height: 76px;
+      border-radius: 999px;
+      background: conic-gradient(from 210deg, #6366f1, #22c55e, #0ea5e9, #6366f1);
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.3);
+    }
+
+    .avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: radial-gradient(circle at 30% 20%, #111827, #020617);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #e5e7eb;
+      font-size: 30px;
+      font-weight: 600;
+    }
+
+    .about-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .about-role {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 12px;
+    }
+
+    .about-body {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.8;
+      margin-bottom: 6px;
+    }
+
+    .about-tagline {
+      font-size: 14px;
+      color: var(--text-sub);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    /* 底部 */
+
+    footer {
+      border-top: 1px solid rgba(229, 231, 235, 0.8);
+      padding: 18px 0 24px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    /* 响应式 */
+
+    @media (max-width: 960px) {
+      .hero-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .hero {
+        padding-top: 32px;
+      }
+
+      .hero-card {
+        order: -1;
+      }
+
+      .posts-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .lab-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .about-card {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .nav-inner {
+        padding-inline: 16px;
+      }
+
+      section {
+        padding: 18px 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-title {
+        font-size: 26px;
+      }
+
+      .hero-subtitle {
+        font-size: 15px;
+      }
+
+      .nav-links {
+        display: none; /* 先简化，小屏直接隐藏导航项 */
+      }
+
+      .brand {
+        font-size: 16px;
+      }
+
+      .about-card {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .posts-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="top" class="page-wrap">
+  <!-- 顶部导航 -->
+  <header class="site-header">
+    <div class="container nav-inner">
+      <div class="brand">
+        <a href="#top">毛毛的产品日记</a>
+      </div>
+      <!-- 右侧导航先留空，等栏目结构稳定后再加 -->
+    </div>
+  </header>
+
+  <main>
+    <!-- 区块 1：推荐文章 Banner（单张，可后续扩展为轮播） -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-banner" id="latest">
+          <div class="hero-slider">
+            <div
+              class="hero-slide is-active"
+              data-title="【00】起点 · 给自己的一块写字地"
+              data-badge="起点"
+              data-badge-class="hero-badge--orange"
+              style='background-image: url("https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=1600&q=80");'
+            ></div>
+            <div
+              class="hero-slide"
+              data-title="【01】把产品当故事来讲"
+              data-badge="精选"
+              data-badge-class="hero-badge--violet"
+              style='background-image: url("https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=80");'
+            ></div>
+            <div
+              class="hero-slide"
+              data-title="【02】那些被忽略的小细节"
+              data-badge="新思考"
+              data-badge-class="hero-badge--green"
+              style='background-image: url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80");'
+            ></div>
+          </div>
+          <div class="hero-badge">起点</div>
+          <h1 class="hero-banner-title">【00】起点 · 给自己的一块写字地</h1>
+          <div class="hero-dots" aria-label="轮播切换">
+            <button class="hero-dot is-active" data-index="0" aria-label="查看第 1 张"></button>
+            <button class="hero-dot" data-index="1" aria-label="查看第 2 张"></button>
+            <button class="hero-dot" data-index="2" aria-label="查看第 3 张"></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 区块 2：专栏分类 -->
+    <section id="categories">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="section-title">内容专栏</div>
+          </div>
+        </div>
+
+        <div class="posts-grid">
+          <article class="post-card is-active" data-category="diary">
+            <h3 class="post-title" style="
+                margin-top: 4px;
+              ">产品日记</h3>
+            <div class="post-meta">更偏过程感的记录 · 以后文章会归在这里</div>
+            <div class="post-card-media post-card-media--diary"></div>
+          </article>
+
+          <article class="post-card" data-category="experience">
+            <h3 class="post-title" style="
+                margin-top: 4px;
+              ">产品体验</h3>
+            <div class="post-meta">用用户视角看产品 · 细节拆解和体验记录</div>
+            <div class="post-card-media post-card-media--experience"></div>
+          </article>
+
+          <article class="post-card" data-category="work">
+            <h3 class="post-title" style="
+                margin-top: 4px;
+              ">职场碎碎念</h3>
+            <div class="post-meta">关于合作、沟通和情绪的小记录</div>
+            <div class="post-card-media post-card-media--work"></div>
+          </article>
+
+          <article class="post-card" data-category="notes">
+            <h3 class="post-title" style="
+                margin-top: 4px;
+              ">随手记录</h3>
+            <div class="post-meta">不一定成文的想法 · 灵感和角落里的小句子</div>
+            <div class="post-card-media post-card-media--notes"></div>
+          </article>
+        </div>
+        <div class="category-list" id="category-list"></div>
+      </div>
+    </section>
+
+    <!-- 区块 3：关于毛毛（个人名片，放在底部） -->
+    <section>
+      <div class="container">
+        <div class="about-card">
+          <div class="about-main">
+            <div class="about-name">毛毛</div>
+            <div class="about-role">6 年产品经验 · 医疗 / 工具方向</div>
+            <div class="about-tagline">
+              永远相信美好的事即将发生。
+            </div>
+            <p class="about-body">
+              这个网站会记录我在产品、项目和职场里的想法，不是教科书，
+              更像一份给自己的长期备忘录。
+            </p>
+          </div>
+          <div class="avatar">
+            <div class="avatar-inner">M</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 区块 5：底部 -->
+  <footer>
+    <div class="container footer-inner">
+      <div>© 2025 写给自己的产品日记</div>
+      <div class="footer-links">
+        <span>以后可以放：小红书 / GitHub</span>
+      </div>
+    </div>
+  </footer>
+</div>
+<script>
+  (function () {
+    var banner = document.getElementById("latest");
+    if (!banner) return;
+
+    var slides = banner.querySelectorAll(".hero-slide");
+    var titleEl = banner.querySelector(".hero-banner-title");
+    var badgeEl = banner.querySelector(".hero-badge");
+    var dots = banner.querySelectorAll(".hero-dot");
+    if (!slides.length || !titleEl) return;
+
+    var current = 0;
+    var timer = null;
+    var interval = 5000;
+    var lastWheelTime = 0;
+
+    function updateDots() {
+      if (!dots.length) return;
+      for (var i = 0; i < dots.length; i++) {
+        if (i === current) {
+          dots[i].classList.add("is-active");
+        } else {
+          dots[i].classList.remove("is-active");
+        }
+      }
+    }
+
+    function showSlide(index) {
+      slides[current].classList.remove("is-active");
+      current = index;
+      slides[current].classList.add("is-active");
+
+      var slide = slides[current];
+      var title = slide.getAttribute("data-title");
+      if (title) {
+        titleEl.textContent = title;
+      }
+
+      if (badgeEl) {
+        var badge = slide.getAttribute("data-badge");
+        var badgeClass = slide.getAttribute("data-badge-class");
+        if (badge) {
+          badgeEl.textContent = badge;
+        }
+        badgeEl.className = "hero-badge";
+        if (badgeClass) {
+          badgeEl.className += " " + badgeClass;
+        }
+      }
+
+      updateDots();
+    }
+
+    function startTimer() {
+      if (timer) clearInterval(timer);
+      timer = setInterval(function () {
+        var next = (current + 1) % slides.length;
+        showSlide(next);
+      }, interval);
+    }
+
+    // 轮播点点击切换
+    for (var i = 0; i < dots.length; i++) {
+      (function (dot) {
+        dot.addEventListener("click", function () {
+          var index = parseInt(dot.getAttribute("data-index"), 10);
+          if (isNaN(index) || index === current) return;
+          showSlide(index);
+          startTimer();
+        });
+      })(dots[i]);
+    }
+
+    // 鼠标滚轮切换（仅在页面顶部、光标在 banner 区域时截获滚动）
+    banner.addEventListener(
+      "wheel",
+      function (e) {
+        // 只有在页面基本在顶部时才启用滚轮切换
+        if (window.scrollY > 8) {
+          return;
+        }
+
+        var rect = banner.getBoundingClientRect();
+        // 光标不在 banner 区域则不处理
+        if (e.clientY < rect.top || e.clientY > rect.bottom) {
+          return;
+        }
+
+        var now = Date.now();
+        if (now - lastWheelTime < 600) return;
+        lastWheelTime = now;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        var next = current + (e.deltaY > 0 ? 1 : -1);
+        if (next < 0) next = slides.length - 1;
+        if (next >= slides.length) next = 0;
+        showSlide(next);
+        startTimer();
+
+        // 强制把页面保持在顶部，避免下滑
+        if (window.scrollY !== 0) {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }
+      },
+      { passive: false }
+    );
+
+    showSlide(0);
+    startTimer();
+
+    // 首屏 banner 进入动画
+    window.setTimeout(function () {
+      banner.classList.add("is-entered");
+    }, 80);
+  })();
+
+  (function () {
+    var cards = document.querySelectorAll(".posts-grid .post-card");
+    var listEl = document.getElementById("category-list");
+    if (!cards.length || !listEl) return;
+
+    var data = {
+      diary: {
+        label: "产品日记",
+        link: "./diary.html",
+        items: [
+          {
+            title: "【09】这一周，我在忙些什么",
+            date: "2025-02-10",
+            cover:
+              "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【08】一个从零开始的小功能",
+            date: "2025-02-05",
+            cover:
+              "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【07】和用户聊完的一些灵感",
+            date: "2025-02-01",
+            cover:
+              "https://images.unsplash.com/photo-1522202195461-41a6521dcd87?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【06】从一次需求评审里学到的事",
+            date: "2025-01-28",
+            cover:
+              "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【05】写给团队看的版本小记",
+            date: "2025-01-25",
+            cover:
+              "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【04】当需求与用户声音不一致时",
+            date: "2025-01-30",
+            cover:
+              "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【03】写给未来自己的产品备忘录",
+            date: "2025-01-22",
+            cover:
+              "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【02】版本上线前的最后 48 小时",
+            date: "2025-01-15",
+            cover:
+              "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【01】这一周的产品碎片",
+            date: "2025-01-07",
+            cover:
+              "https://images.unsplash.com/photo-1522202195461-41a6521dcd87?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【00】起点 · 给自己的一块写字地",
+            date: "2025-01-01",
+            cover:
+              "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=80"
+          }
+        ]
+      },
+      experience: {
+        label: "产品体验",
+        link: "./experience.html",
+        items: [
+          {
+            title: "【10】从登录到首页的 10 秒体验",
+            date: "2025-03-01",
+            cover:
+              "https://images.unsplash.com/photo-1523475472560-d2df97ec485c?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【09】一个按钮文案的 AB 测试",
+            date: "2025-02-27",
+            cover:
+              "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【08】把复杂表单做得没那么吓人",
+            date: "2025-02-24",
+            cover:
+              "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【07】一个小动效带来的惊喜感",
+            date: "2025-02-21",
+            cover:
+              "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【06】错误提示也可以很温柔",
+            date: "2025-02-18",
+            cover:
+              "https://images.unsplash.com/photo-1587613864525-ec0429c7e4bd?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【05】移动端表单的三个小细节",
+            date: "2025-02-26",
+            cover:
+              "https://images.unsplash.com/photo-1523475472560-d2df97ec485c?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【04】通知中心应该多「吵闹」？",
+            date: "2025-02-20",
+            cover:
+              "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【03】信息架构里的「一厘米偏差」",
+            date: "2025-02-12",
+            cover:
+              "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【02】从一次失败的搜索说起",
+            date: "2025-02-05",
+            cover:
+              "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【01】一个注册流程可以简单到什么程度",
+            date: "2025-02-01",
+            cover:
+              "https://images.unsplash.com/photo-1587613864525-ec0429c7e4bd?auto=format&fit=crop&w=400&q=80"
+          }
+        ]
+      },
+      work: {
+        label: "职场碎碎念",
+        link: "./work.html",
+        items: [
+          {
+            title: "【10】做产品的情绪自救手册",
+            date: "2025-04-02",
+            cover:
+              "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【09】写周报时我会先想什么",
+            date: "2025-03-30",
+            cover:
+              "https://images.unsplash.com/photo-1525134479668-1bee5c7c6845?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【08】和设计师吵架之后",
+            date: "2025-03-28",
+            cover:
+              "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【07】被否掉的方案也值得记录",
+            date: "2025-03-26",
+            cover:
+              "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【06】那些让我成长的反馈",
+            date: "2025-03-23",
+            cover:
+              "https://images.unsplash.com/photo-1519241047957-be31d7379a5d?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【05】那些让我腰直起来的反馈",
+            date: "2025-03-25",
+            cover:
+              "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【04】向上管理不是「拍马屁」",
+            date: "2025-03-18",
+            cover:
+              "https://images.unsplash.com/photo-1525134479668-1bee5c7c6845?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【03】开会之前我现在会先想三件事",
+            date: "2025-03-11",
+            cover:
+              "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【02】当需求来得又急又糊时",
+            date: "2025-03-06",
+            cover:
+              "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【01】和不同角色打交道的边界感",
+            date: "2025-03-02",
+            cover:
+              "https://images.unsplash.com/photo-1519241047957-be31d7379a5d?auto=format&fit=crop&w=400&q=80"
+          }
+        ]
+      },
+      notes: {
+        label: "随手记录",
+        link: "./notes.html",
+        items: [
+          {
+            title: "【10】今天路上听到的一句话",
+            date: "2025-04-20",
+            cover:
+              "https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【09】灵感速记：一个导航的想法",
+            date: "2025-04-18",
+            cover:
+              "https://images.unsplash.com/photo-1521747116042-5a810fda9664?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【08】写在深夜的一行字",
+            date: "2025-04-16",
+            cover:
+              "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【07】会议里突然冒出来的点子",
+            date: "2025-04-15",
+            cover:
+              "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【06】不想忘掉的一句夸奖",
+            date: "2025-04-13",
+            cover:
+              "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【05】最近很喜欢的一个界面细节",
+            date: "2025-04-14",
+            cover:
+              "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【04】想留给 40 岁的一句话",
+            date: "2025-04-10",
+            cover:
+              "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【03】半夜想到的一个产品点子",
+            date: "2025-04-07",
+            cover:
+              "https://images.unsplash.com/photo-1521747116042-5a810fda9664?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【02】一个还没想明白的问题",
+            date: "2025-04-03",
+            cover:
+              "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80"
+          },
+          {
+            title: "【01】路上看到的一句文案",
+            date: "2025-04-01",
+            cover:
+              "https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=400&q=80"
+          }
+        ]
+      }
+    };
+
+    function renderList(key) {
+      var cfg = data[key] || {};
+      var items = cfg.items || [];
+      if (!items.length) {
+        listEl.innerHTML = "";
+        listEl.className = "category-list";
+        return;
+      }
+
+      // 按时间倒序展示，只取前 10 篇
+      var sorted = items.slice().sort(function (a, b) {
+        if (a.date === b.date) return 0;
+        return a.date < b.date ? 1 : -1;
+      });
+      var visible = sorted.slice(0, 10);
+
+      var link = cfg.link || "#";
+
+      var html = '<div class="category-list-header">';
+      html += '<div>';
+      html += '<div class="category-list-title">最近更新</div>';
+      html += "</div>";
+      html +=
+        '<a class="category-list-more" href="' +
+        link +
+        '">查看更多<span class="category-list-more-icon">↗</span></a>';
+      html += "</div>";
+
+      html += '<ul class="category-list-items">';
+      for (var i = 0; i < visible.length; i++) {
+        var item = visible[i];
+        var cover = item.cover || "";
+        var itemLink = item.link || "";
+
+        html += '<li class="category-item' + (itemLink ? " category-item--clickable" : "") + '"';
+        if (itemLink) {
+          html += ' data-link="' + itemLink + '"';
+        }
+        html += ">";
+        html +=
+          '<div class="category-item-thumb"' +
+          (cover
+            ? ' style="background-image:url(' + "'" + cover + "'" + ');"'
+            : "") +
+          "></div>";
+        html += '<div class="category-item-content">';
+        html += '<div class="category-item-title">' + item.title + "</div>";
+        html += '<div class="category-item-date">' + item.date + "</div>";
+        html += "</div>";
+        html += "</li>";
+      }
+      html += "</ul>";
+      listEl.innerHTML = html;
+
+      // 根据当前分类加上对应颜色样式
+      listEl.className = "category-list category-list--" + key;
+
+      // 给带 link 的条目加点击跳转
+      var cards = listEl.querySelectorAll(".category-item--clickable");
+      for (var i = 0; i < cards.length; i++) {
+        (function (card) {
+          var url = card.getAttribute("data-link");
+          if (!url) return;
+          card.addEventListener("click", function () {
+            window.location.href = url;
+          });
+        })(cards[i]);
+      }
+    }
+
+    function setActive(card) {
+      for (var i = 0; i < cards.length; i++) {
+        cards[i].classList.remove("is-active");
+      }
+      card.classList.add("is-active");
+    }
+
+    for (var i = 0; i < cards.length; i++) {
+      (function (card) {
+        card.addEventListener("click", function () {
+          var key = card.getAttribute("data-category");
+          if (!key) return;
+          setActive(card);
+          renderList(key);
+        });
+      })(cards[i]);
+    }
+
+    // 初始化默认选中第一个
+    var firstKey = cards[0].getAttribute("data-category");
+    renderList(firstKey);
+  })();
+
+  (function () {
+    var header = document.querySelector(".site-header");
+    if (!header) return;
+
+    var lastY = window.scrollY || window.pageYOffset || 0;
+    var ticking = false;
+
+    function handleScroll() {
+      var currentY = window.scrollY || window.pageYOffset || 0;
+      var delta = currentY - lastY;
+
+      if (Math.abs(delta) < 4) {
+        lastY = currentY;
+        return;
+      }
+
+      if (currentY > 80 && delta > 0) {
+        header.classList.add("is-hidden");
+      } else {
+        header.classList.remove("is-hidden");
+      }
+
+      lastY = currentY;
+    }
+
+    window.addEventListener("scroll", function () {
+      if (!ticking) {
+        window.requestAnimationFrame(function () {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+  })();
+</script>
+</body>
+</html>
