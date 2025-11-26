@@ -1684,21 +1684,19 @@
                </div>
                <div class="visitor-card-body">
                  <div class="visitor-metric">
-                   <span class="visitor-metric-label">当前在线</span>
-                   <span class="visitor-metric-value" id="onlineStats">8</span>
-                 </div>
-                 <div class="visitor-metric">
                    <span class="visitor-metric-label">今日访客</span>
-                   <span class="visitor-metric-value" id="todayStats">128</span>
+                   <span class="visitor-metric-value" id="busuanzi_value_site_pv">--</span>
                  </div>
                  <div class="visitor-metric">
                    <span class="visitor-metric-label">累计访客</span>
-                   <span class="visitor-metric-value" id="totalStats">2,345</span>
+                   <span class="visitor-metric-value" id="busuanzi_value_site_uv">--</span>
                  </div>
                </div>
                <div class="visitor-card-footer">
-                 <span class="visitor-trend"><i class="ri-arrow-up-line"></i> 较昨日增长 12%</span>
+                 <span class="visitor-trend"><i class="ri-earth-line"></i> 数据来源：不蒜子</span>
                </div>
+               <!-- 引入不蒜子脚本 -->
+               <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
              </div>
           </div>
         </div>
@@ -3199,9 +3197,10 @@
     }
 
     // 启动
-    initStats();
-    updateOnline();
-    setInterval(updateOnline, 5000);
+    // 由于已接入不蒜子真实统计，本地模拟逻辑不再执行，避免冲突
+    // initStats();
+    // updateOnline();
+    // setInterval(updateOnline, 5000);
   })();
 
 
