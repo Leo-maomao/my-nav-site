@@ -3189,40 +3189,52 @@
         // display=1,1,1,1... 通常对应 ID, 今日, 昨日, 本月, 总量...
         // 但 quote.js 的渲染顺序可能不同，通常它会有 title="今日访问" 这样的属性或者文本
         
-        // 更加鲁棒的正则匹配
-        var totalMatch = text.match(/(?:总|Total).*?(\d+)/);
-        var todayMatch = text.match(/(?:今|Today).*?(\d+)/);
+        // 尝试优先匹配带 "UV" 或 "访客" 标记的数字
+        var totalUvMatch = text.match(/(?:总|Total).*?(?:UV|访客).*?(\d+)/i);
+        var todayUvMatch = text.match(/(?:今|Today).*?(?:UV|访客).*?(\d+)/i);
+        
+        // 基础匹配 (PV)
+        var totalPvMatch = text.match(/(?:总|Total).*?(\d+)/);
+        var todayPvMatch = text.match(/(?:今|Today).*?(\d+)/);
         var onlineMatch = text.match(/(?:在线|Online|Current).*?(\d+)/);
 
-        // 如果正则匹配不到，尝试直接按数字出现顺序提取 (fallback)
-        // 通常顺序包含：ID, 今日, 昨日, 本月, 总量, 在线... 具体看 display 参数
-        // 51.la 挂件在 display=1,1,1,1,1,1,1,1 全开时，顺序通常是：ID, 今日, 昨日, 本月, 总量
-        // 但是有时候总量的 label 可能是隐藏的，或者在 span 里
+        // 提取数字 (Fallback)
         var allNums = text.match(/\d+/g);
 
-        // 优化提取逻辑：
-        // 1. 如果能匹配到 Total 关键字，用 Total
-        // 2. 如果匹配不到，尝试从数字列表中找最大的那个（通常总量最大），或者最后一个（如果是按顺序排的）
-        var totalVal = totalMatch ? totalMatch[1] : "--";
+        // 逻辑：优先取 UV，取不到取 PV，再取不到猜一个
+        // 注意：51.la 免费版挂件可能只显示 PV，不显示 UV，除非是 Pro 版
+        // 如果只有 PV，我们也只能展示 PV，但要保证逻辑自洽 (Total >= Today)
+        
+        var todayVal = todayUvMatch ? todayUvMatch[1] : (todayPvMatch ? todayPvMatch[1] : (allNums && allNums.length > 0 ? allNums[0] : "--"));
+        var totalVal = totalUvMatch ? totalUvMatch[1] : (totalPvMatch ? totalPvMatch[1] : "--");
+        
+        // Fallback for Total: 如果正则挂了，找最大值
         if (totalVal === "--" && allNums && allNums.length > 0) {
-             // 假设总量是最大的那个数字 (简单粗暴但有效)
              var maxNum = 0;
              allNums.forEach(function(n) {
                  var num = parseInt(n, 10);
-                 if (num > maxNum && num < 10000000000) maxNum = num; // 排除 ID (通常很大)
+                 if (num > maxNum && num < 10000000000) maxNum = num;
              });
-             if (maxNum > 0) totalVal = maxNum;
-             // 如果还是 0，可能是新站，那也没办法
+             if (maxNum > 0) totalVal = maxNum.toString();
         }
 
-        var todayVal = todayMatch ? todayMatch[1] : (allNums && allNums.length > 0 ? allNums[0] : "--");
-        var onlineVal = onlineMatch ? onlineMatch[1] : "1"; // 在线人数兜底为1
+        var onlineVal = onlineMatch ? onlineMatch[1] : "1"; 
 
-        // 如果今日访客 > 0 且 累计访客 == 0 (或者比今日还小)，这不科学，强制同步
-        if (todayVal !== "--" && totalVal !== "--") {
-            if (parseInt(totalVal) < parseInt(todayVal)) {
-                totalVal = todayVal;
+        // 数据清洗与逻辑校验
+        var tDay = parseInt(todayVal, 10);
+        var tTot = parseInt(totalVal, 10);
+
+        // 1. 如果 Total 无效 或 Today > Total，强制修正 Total
+        if (!isNaN(tDay)) {
+            if (isNaN(tTot) || tTot < tDay) {
+                tTot = tDay; // 累计至少等于今日
+                totalVal = tTot.toString();
             }
+        }
+        
+        // 2. 如果 Total 还是 0 (可能是新站)，但既然有人在看(Online>=1)，Total 至少是 1
+        if (tTot === 0) {
+            totalVal = "1";
         }
 
         // 更新 UI
@@ -3230,9 +3242,8 @@
         var elToday = document.getElementById("custom_today");
         var elOnline = document.getElementById("custom_online");
 
-        if (elTotal && totalVal !== "--") elTotal.textContent = totalVal;
-        if (elToday && todayVal !== "--") elToday.textContent = todayVal;
-        // 如果抓取不到在线，默认显示 1 (至少你自己在线)
+        if (elTotal) elTotal.textContent = totalVal;
+        if (elToday) elToday.textContent = todayVal;
         if (elOnline) elOnline.textContent = (onlineVal !== "--" && onlineVal !== null) ? onlineVal : "1";
     }
 
