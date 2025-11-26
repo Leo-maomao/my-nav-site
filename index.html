@@ -400,13 +400,24 @@
       border: 1px solid #e2e8f0;
       display: flex;
       flex-direction: column;
+      /* 核心修改：使用 aspect-ratio 保持比例，防止在小屏下折叠 */
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+    }
+    
+    /* 针对更宽屏幕的优化，避免太高 */
+    @media (min-width: 1200px) {
+      .hero-banner {
+        aspect-ratio: 2.5 / 1; /* 宽屏下更扁一点，节省垂直空间 */
+      }
     }
     
     .banner-wrapper {
       position: relative;
       width: 100%;
       height: 100%;
-      min-height: 180px; /* Ensure minimum height matches neighbors */
+      /* 移除 min-height，完全靠 aspect-ratio 撑开 */
     }
 
     .banner-slide {
@@ -1725,11 +1736,25 @@
                    <span>站点访客</span>
                  </div>
                </div>
-               <div class="visitor-card-body">
-                 <!-- 51.la 挂件容器 -->
-                 <!-- 1. 移除 visibility: hidden，让它正常显示以便调试 -->
-                 <!-- 2. 移除 id="online_count" 等占位符，直接展示 51.la 挂件内容 -->
-                 <div id="la_data_container">
+               <div class="visitor-card-body" style="position: relative; padding: 0;">
+                 <!-- 自定义样式展示层 -->
+                 <div id="visitor_custom_ui" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                    <div class="visitor-metric-row" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #f1f5f9; padding-bottom: 8px;">
+                        <span style="font-size: 12px; color: #64748b;">总访问量</span>
+                        <span id="custom_total" style="font-size: 18px; font-weight: 700; color: #0f172a; font-family: 'SF Mono', monospace;">--</span>
+                    </div>
+                    <div class="visitor-metric-row" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #f1f5f9; padding-bottom: 8px;">
+                        <span style="font-size: 12px; color: #64748b;">今日访客</span>
+                        <span id="custom_today" style="font-size: 18px; font-weight: 700; color: #0f172a; font-family: 'SF Mono', monospace;">--</span>
+                    </div>
+                    <div class="visitor-metric-row" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; color: #64748b;">昨日访客</span>
+                        <span id="custom_yesterday" style="font-size: 18px; font-weight: 700; color: #0f172a; font-family: 'SF Mono', monospace;">--</span>
+                    </div>
+                 </div>
+
+                 <!-- 51.la 原始挂件 (隐藏抓取数据源) -->
+                 <div id="la_data_container" style="opacity: 0; position: absolute; top: 0; left: 0; z-index: -1; height: 0; overflow: hidden; pointer-events: none;">
                     <script id="LA-DATA-WIDGET" crossorigin="anonymous" charset="UTF-8" src="https://v6-widget.51.la/v6/3OBuXueXb41ODfzv/quote.js?theme=0&col=true&f=12&display=1,1,1,1,0,0,0,1"></script>
                  </div>
                </div>
@@ -3133,9 +3158,45 @@
   })();
 
 
-  // 访客数据逻辑 (已改为 CSS 直接美化挂件)
+  // 访客数据逻辑：从 51.la 隐藏挂件中抓取数据并填入自定义样式
   (function () {
-    // 无需 JS 介入，样式由 CSS #la_data_container 控制
+    function syncData() {
+        var container = document.getElementById("la_data_container");
+        if (!container) return;
+
+        // 51.la v6 挂件通常渲染为 span 列表，内容格式如 "今日访问 123"
+        // 我们尝试获取所有数字
+        var text = container.innerText || "";
+        if (!text.trim()) return;
+
+        // 解析数字：假设顺序是 总量 -> 今日 -> 昨日 (取决于 display 参数)
+        // display=1,1,1,1... 通常对应 ID, 今日, 昨日, 本月, 总量...
+        // 但 quote.js 的渲染顺序可能不同，通常它会有 title="今日访问" 这样的属性或者文本
+        
+        // 更加鲁棒的正则匹配
+        var totalMatch = text.match(/(?:总|Total).*?(\d+)/);
+        var todayMatch = text.match(/(?:今|Today).*?(\d+)/);
+        var yestMatch = text.match(/(?:昨|Yesterday).*?(\d+)/);
+
+        // 如果正则匹配不到，尝试直接按数字出现顺序提取 (fallback)
+        var allNums = text.match(/\d+/g);
+
+        var totalVal = totalMatch ? totalMatch[1] : (allNums && allNums.length > 2 ? allNums[allNums.length - 1] : "--");
+        var todayVal = todayMatch ? todayMatch[1] : (allNums && allNums.length > 0 ? allNums[0] : "--");
+        var yestVal = yestMatch ? yestMatch[1] : (allNums && allNums.length > 1 ? allNums[1] : "--");
+
+        // 更新 UI
+        var elTotal = document.getElementById("custom_total");
+        var elToday = document.getElementById("custom_today");
+        var elYest = document.getElementById("custom_yesterday");
+
+        if (elTotal && totalVal !== "--") elTotal.textContent = totalVal;
+        if (elToday && todayVal !== "--") elToday.textContent = todayVal;
+        if (elYest && yestVal !== "--") elYest.textContent = yestVal;
+    }
+
+    // 轮询检查数据是否加载完成
+    setInterval(syncData, 1000);
   })();
 
 
@@ -3155,12 +3216,16 @@
     var currentIndex = 0;
     var slideInterval = null;
 
-    // 多源 RSS 配置
+    // 多源 RSS 配置 (国内外 AI 资讯混合，频率 1h 更新)
     // 使用 rss2json API (free tier limits: 1h cache)
     var feedSources = [
+      { url: "https://www.jiqizhixin.com/rss", name: "机器之心" },
+      { url: "https://www.qbitai.com/feed", name: "量子位" },
+      { url: "https://36kr.com/feed", name: "36氪" },
+      { url: "https://www.aibase.com/feed", name: "AI基地" }, 
+      { url: "https://hub.baai.ac.cn/rss", name: "智源社区" },
       { url: "https://techcrunch.com/category/artificial-intelligence/feed/", name: "TechCrunch" },
-      { url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", name: "The Verge" },
-      { url: "https://www.wired.com/feed/tag/ai/latest/rss", name: "Wired" }
+      { url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", name: "The Verge" }
     ];
 
     // Fallback data
