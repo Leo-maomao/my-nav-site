@@ -1708,7 +1708,7 @@
                  </div>
                </div>
                <!-- 隐藏的 51.la 数据挂件容器，用于抓取数据 -->
-               <div id="la_data_hidden" style="display:none;">
+               <div id="la_data_hidden" style="visibility: hidden; position: absolute; z-index: -1; width: 0; height: 0; overflow: hidden;">
                   <script id="LA-DATA-WIDGET" crossorigin="anonymous" charset="UTF-8" src="https://v6-widget.51.la/v6/3OBuXueXb41ODfzv/quote.js?theme=0&col=true&f=12&display=1,1,1,1,0,0,0,1"></script>
                </div>
              </div>
@@ -3112,41 +3112,56 @@
 
 
   // 访客数据逻辑 (基于 51.la Widget DOM 抓取)
-  // 说明：51.la 挂件会渲染在页面上，我们监听它的渲染，然后把数据抓取到我们自定义的漂亮的卡片里
   (function () {
-    // 等待挂件加载
+    var retryCount = 0;
+    var maxRetries = 30; // 尝试 30 次 (30秒)
+
     var checkInterval = setInterval(function() {
       var widgetContainer = document.getElementById("la_data_hidden");
       if (!widgetContainer) return;
       
-      // 51.la 挂件通常会渲染成一系列 span 标签
-      // 根据 display 参数 1,1,1,1... 顺序通常是：今日PV, 昨日PV, 今日UV, 昨日UV...
-      // 或者是：总PV, 今日PV, 昨日PV, 总UV, 今日UV... 
-      // 具体取决于 51.la 默认的渲染顺序。通常 v6 挂件带 labels。
-      
-      // 尝试查找带有数字的 span
-      // 由于 51.la 结构可能会变，我们这里采用一种通用的“偷数据”策略
-      // 挂件渲染后，里面会有多个 span.la-quote-item 之类的
-      
-      var spans = widgetContainer.querySelectorAll("span");
-      if (spans.length > 0) {
-         // 解析数据 (这是一个猜测的映射，上线后可能需要调整)
-         // 假设挂件按照：今日PV, 今日UV, 昨日PV, 昨日UV... 顺序
-         // 或者它直接包含文本 "今日访问: 123"
+      // 尝试获取里面的所有数字
+      // 51.la v6 挂件通常包含多个 <span>，里面可能有 label 和 value
+      // 或者直接是一串文本。我们提取所有数字。
+      var text = widgetContainer.innerText || "";
+      var numbers = text.match(/\d+/g); // 提取所有整数
+
+      if (numbers && numbers.length >= 3) {
+         // 成功获取到数据！
+         // display参数: 1,1,1,1,0,0,0,1 -> 今日PV, 昨日PV, 今日UV, 昨日UV, ..., 当前在线
+         // 注意：51.la 可能会显示 label，比如 "今日PV: 100"。match(/\d+/) 会按顺序提取出数字。
          
-         var text = widgetContainer.innerText || "";
-         // 尝试正则匹配
-         // 假设格式：今日访问 123 ...
+         // 假设 numbers 数组顺序：
+         // [0] = 今日PV
+         // [1] = 昨日PV
+         // [2] = 今日UV
+         // [3] = 昨日UV
+         // [last] = 当前在线 (如果开启了)
          
-         // 由于无法确定 51.la 挂件确切的 DOM 结构（因为它是动态加载的 iframe 或 js）
-         // 我们采取更稳妥的方式：如果不显示，就显示挂件本身
-         // 但为了美观，我们尝试提取数字。
+         var todayUV = numbers[2]; 
+         var online = numbers[numbers.length - 1]; 
+         // 累计访客通常不在 display 参数的前几个里，可能需要开启 "总PV/总UV"
+         // 但如果不蒜子移除了，我们需要找一个近似值。
+         // 暂时用 "昨日PV + 今日PV" 或者直接抓取 Total 字段（如果 display 参数有）
+         // 如果 display 参数里没有 total，我们可以暂时显示 "统计中" 或 numbers[0]
          
-         // 临时方案：如果您发现数据显示位置不对，请告诉我“挂件显示了什么内容”，我再调整正则。
-         // 这里我们先不 parse，而是等待您反馈效果。
-         // 现在的代码仅仅是把挂件脚本放进去了。
+         var totalUV = "统计中"; // 暂时占位，或者用 numbers[0] (今日PV) 代替
          
+         // 更新 DOM
+         var onlineEl = document.getElementById("online_count");
+         var todayEl = document.getElementById("today_uv");
+         var totalEl = document.getElementById("total_uv");
+         
+         if (onlineEl) onlineEl.textContent = online;
+         if (todayEl) todayEl.textContent = todayUV;
+         // if (totalEl) totalEl.textContent = totalUV; 
+
          clearInterval(checkInterval);
+      }
+      
+      retryCount++;
+      if (retryCount > maxRetries) {
+        clearInterval(checkInterval); // 超时放弃
       }
     }, 1000);
   })();
