@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>毛毛 · 个人导航页</title>
+  <title>毛毛的导航站</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- 引入 Remix Icon 图标库 -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -3196,11 +3196,34 @@
 
         // 如果正则匹配不到，尝试直接按数字出现顺序提取 (fallback)
         // 通常顺序包含：ID, 今日, 昨日, 本月, 总量, 在线... 具体看 display 参数
+        // 51.la 挂件在 display=1,1,1,1,1,1,1,1 全开时，顺序通常是：ID, 今日, 昨日, 本月, 总量
+        // 但是有时候总量的 label 可能是隐藏的，或者在 span 里
         var allNums = text.match(/\d+/g);
 
-        var totalVal = totalMatch ? totalMatch[1] : (allNums && allNums.length > 3 ? allNums[3] : "--");
+        // 优化提取逻辑：
+        // 1. 如果能匹配到 Total 关键字，用 Total
+        // 2. 如果匹配不到，尝试从数字列表中找最大的那个（通常总量最大），或者最后一个（如果是按顺序排的）
+        var totalVal = totalMatch ? totalMatch[1] : "--";
+        if (totalVal === "--" && allNums && allNums.length > 0) {
+             // 假设总量是最大的那个数字 (简单粗暴但有效)
+             var maxNum = 0;
+             allNums.forEach(function(n) {
+                 var num = parseInt(n, 10);
+                 if (num > maxNum && num < 10000000000) maxNum = num; // 排除 ID (通常很大)
+             });
+             if (maxNum > 0) totalVal = maxNum;
+             // 如果还是 0，可能是新站，那也没办法
+        }
+
         var todayVal = todayMatch ? todayMatch[1] : (allNums && allNums.length > 0 ? allNums[0] : "--");
         var onlineVal = onlineMatch ? onlineMatch[1] : "1"; // 在线人数兜底为1
+
+        // 如果今日访客 > 0 且 累计访客 == 0 (或者比今日还小)，这不科学，强制同步
+        if (todayVal !== "--" && totalVal !== "--") {
+            if (parseInt(totalVal) < parseInt(todayVal)) {
+                totalVal = todayVal;
+            }
+        }
 
         // 更新 UI
         var elTotal = document.getElementById("custom_total");
