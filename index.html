@@ -920,17 +920,49 @@
     }
 
 
-    /* 51.la 挂件样式重写 (使其与卡片融合) */
-    /* 隐藏原始的样式干扰 */
-    #la_data_hidden {
-        font-size: 0; /* Hide text nodes */
+    /* 51.la 挂件样式深度定制 */
+    #la_data_container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        min-height: 100px; /* 给它一个最小高度，确保有地方渲染 */
     }
-    /* 我们只需要里面的数字 */
-    #la_data_hidden span {
-      /* 这里的样式其实没用，因为我们在 DOM 里抓取了 */
+    
+    /* 尝试对 51.la 默认生成的结构进行样式覆盖 */
+    /* 51.la v6 挂件通常生成 span 或 div 列表 */
+    #la_data_container .la-quote-item, 
+    #la_data_container span {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        font-size: 12px !important;
+        color: #6b7280 !important;
+        margin: 0 !important;
+        padding: 4px 0 !important;
+        border-bottom: 1px dashed #f1f5f9;
+    }
+    
+    #la_data_container .la-quote-item:last-child,
+    #la_data_container span:last-child {
+        border-bottom: none;
+    }
+
+    /* 数字加粗 */
+    #la_data_container .la-quote-item b,
+    #la_data_container span b,
+    #la_data_container span strong, 
+    #la_data_container span i {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #111827 !important;
+        font-family: 'SF Mono', 'Menlo', monospace !important;
+        font-style: normal !important;
     }
 
     /* 翻页动画关键帧 */
+    @keyframes flipTop {
       0% { transform: rotateX(0deg); }
       100% { transform: rotateX(-90deg); }
     }
@@ -1693,23 +1725,13 @@
                    <span>站点访客</span>
                  </div>
                </div>
-               <div class="visitor-card-body" style="text-align: center;">
-                 <div class="visitor-metric">
-                   <span class="visitor-metric-label">当前在线</span>
-                   <span class="visitor-metric-value" id="online_count">--</span>
+               <div class="visitor-card-body">
+                 <!-- 51.la 挂件容器 -->
+                 <!-- 1. 移除 visibility: hidden，让它正常显示以便调试 -->
+                 <!-- 2. 移除 id="online_count" 等占位符，直接展示 51.la 挂件内容 -->
+                 <div id="la_data_container">
+                    <script id="LA-DATA-WIDGET" crossorigin="anonymous" charset="UTF-8" src="https://v6-widget.51.la/v6/3OBuXueXb41ODfzv/quote.js?theme=0&col=true&f=12&display=1,1,1,1,0,0,0,1"></script>
                  </div>
-                 <div class="visitor-metric">
-                   <span class="visitor-metric-label">今日访客</span>
-                   <span class="visitor-metric-value" id="today_uv">--</span>
-                 </div>
-                 <div class="visitor-metric">
-                   <span class="visitor-metric-label">累计访客</span>
-                   <span class="visitor-metric-value" id="total_uv">--</span>
-                 </div>
-               </div>
-               <!-- 隐藏的 51.la 数据挂件容器，用于抓取数据 -->
-               <div id="la_data_hidden" style="visibility: hidden; position: absolute; z-index: -1; width: 0; height: 0; overflow: hidden;">
-                  <script id="LA-DATA-WIDGET" crossorigin="anonymous" charset="UTF-8" src="https://v6-widget.51.la/v6/3OBuXueXb41ODfzv/quote.js?theme=0&col=true&f=12&display=1,1,1,1,0,0,0,1"></script>
                </div>
              </div>
           </div>
@@ -3111,59 +3133,9 @@
   })();
 
 
-  // 访客数据逻辑 (基于 51.la Widget DOM 抓取)
+  // 访客数据逻辑 (已改为 CSS 直接美化挂件)
   (function () {
-    var retryCount = 0;
-    var maxRetries = 30; // 尝试 30 次 (30秒)
-
-    var checkInterval = setInterval(function() {
-      var widgetContainer = document.getElementById("la_data_hidden");
-      if (!widgetContainer) return;
-      
-      // 尝试获取里面的所有数字
-      // 51.la v6 挂件通常包含多个 <span>，里面可能有 label 和 value
-      // 或者直接是一串文本。我们提取所有数字。
-      var text = widgetContainer.innerText || "";
-      var numbers = text.match(/\d+/g); // 提取所有整数
-
-      if (numbers && numbers.length >= 3) {
-         // 成功获取到数据！
-         // display参数: 1,1,1,1,0,0,0,1 -> 今日PV, 昨日PV, 今日UV, 昨日UV, ..., 当前在线
-         // 注意：51.la 可能会显示 label，比如 "今日PV: 100"。match(/\d+/) 会按顺序提取出数字。
-         
-         // 假设 numbers 数组顺序：
-         // [0] = 今日PV
-         // [1] = 昨日PV
-         // [2] = 今日UV
-         // [3] = 昨日UV
-         // [last] = 当前在线 (如果开启了)
-         
-         var todayUV = numbers[2]; 
-         var online = numbers[numbers.length - 1]; 
-         // 累计访客通常不在 display 参数的前几个里，可能需要开启 "总PV/总UV"
-         // 但如果不蒜子移除了，我们需要找一个近似值。
-         // 暂时用 "昨日PV + 今日PV" 或者直接抓取 Total 字段（如果 display 参数有）
-         // 如果 display 参数里没有 total，我们可以暂时显示 "统计中" 或 numbers[0]
-         
-         var totalUV = "统计中"; // 暂时占位，或者用 numbers[0] (今日PV) 代替
-         
-         // 更新 DOM
-         var onlineEl = document.getElementById("online_count");
-         var todayEl = document.getElementById("today_uv");
-         var totalEl = document.getElementById("total_uv");
-         
-         if (onlineEl) onlineEl.textContent = online;
-         if (todayEl) todayEl.textContent = todayUV;
-         // if (totalEl) totalEl.textContent = totalUV; 
-
-         clearInterval(checkInterval);
-      }
-      
-      retryCount++;
-      if (retryCount > maxRetries) {
-        clearInterval(checkInterval); // 超时放弃
-      }
-    }, 1000);
+    // 无需 JS 介入，样式由 CSS #la_data_container 控制
   })();
 
 
@@ -3412,8 +3384,14 @@
 
 </script>
   <!-- 51.la 统计脚本 (用于收集数据) -->
-  <script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
-  <script>LA.init({id:"3OBuXueXb41ODfzv",ck:"3OBuXueXb41ODfzv"})</script>
+  <script charset="UTF-8" id="LA_COLLECT" src="https://sdk.51.la/js-sdk-pro.min.js"></script>
+  <script>
+    try {
+      LA.init({id:"3OBuXueXb41ODfzv",ck:"3OBuXueXb41ODfzv"});
+    } catch (e) {
+      console.warn("LA init failed", e);
+    }
+  </script>
 </body>
 </html>
 
