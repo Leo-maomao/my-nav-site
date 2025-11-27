@@ -1864,7 +1864,7 @@
                  <!-- 51.la 原始挂件 (隐藏抓取数据源) -->
                  <div id="la_data_container" style="opacity: 0; position: absolute; top: 0; left: 0; z-index: -1; height: 0; overflow: hidden; pointer-events: none;">
                     <!-- display参数全开，确保能抓到所有数据 -->
-                    <script id="LA-DATA-WIDGET" crossorigin="anonymous" charset="UTF-8" src="https://v6-widget.51.la/v6/3OBuXueXb41ODfzv/quote.js?theme=0&col=true&f=12&display=1,1,1,1,1,1,1,1"></script>
+                    <script id="LA-DATA-WIDGET" crossorigin="anonymous" charset="UTF-8" src="https://v6-widget.51.la/v6/3OBuXueXb41ODfzv/quote.js?theme=0&col=true&f=12&badge=icon_0&icon=center&display=1,1,1,0,0,0,0,1"></script>
                  </div>
                </div>
              </div>
@@ -3274,73 +3274,67 @@
   (function () {
     function syncData() {
         var container = document.getElementById("la_data_container");
+        
         if (!container) return;
 
-        // 51.la v6 挂件通常渲染为 span 列表，内容格式如 "今日访问 123"
-        // 我们尝试获取所有数字
-        var text = container.innerText || "";
+        // Try to get text even if hidden
+        var text = container.textContent || container.innerText || "";
+        
         if (!text.trim()) return;
+        
+        // 解析数字：
+        // 顺序通常是：[标题] -> [活跃] -> [今日UV] -> [总PV]
+        // 或者 [标题] -> [活跃] -> [今日UV] -> [总UV] (如果display允许)
+        // 我们现在使用 display=1,1,1,0,0,0,0,1
+        // 1: Title
+        // 1: Active (Current Online)
+        // 1: Today UV
+        // 0: Today PV
+        // 0: Yesterday UV
+        // 0: Yesterday PV
+        // 0: Month PV
+        // 1: Total PV (usually, unless Total UV is available)
 
-        // 解析数字：假设顺序是 总量 -> 今日 -> 昨日 (取决于 display 参数)
-        // display=1,1,1,1... 通常对应 ID, 今日, 昨日, 本月, 总量...
-        // 但 quote.js 的渲染顺序可能不同，通常它会有 title="今日访问" 这样的属性或者文本
-        
-        // 尝试优先匹配带 "UV" 或 "访客" 标记的数字
-        var totalUvMatch = text.match(/(?:总|Total).*?(?:UV|访客).*?(\d+)/i);
-        var todayUvMatch = text.match(/(?:今|Today).*?(?:UV|访客).*?(\d+)/i);
-        
-        // 基础匹配 (PV)
-        var totalPvMatch = text.match(/(?:总|Total).*?(\d+)/);
-        var todayPvMatch = text.match(/(?:今|Today).*?(\d+)/);
-        var onlineMatch = text.match(/(?:在线|Online|Current).*?(\d+)/);
+        // 尝试正则匹配
+        var onlineMatch = text.match(/(\d+).*?(?:活跃|在线|Current)/) || text.match(/(?:活跃|在线|Current).*?(\d+)/);
+        var todayMatch  = text.match(/(\d+).*?(?:今日|Today)/) || text.match(/(?:今日|Today).*?(\d+)/);
+        var totalMatch  = text.match(/(\d+).*?(?:总|Total)/) || text.match(/(?:总|Total).*?(\d+)/);
 
-        // 提取数字 (Fallback)
-        var allNums = text.match(/\d+/g);
+        // 如果正则失败，尝试纯数字序列
+        // 预期顺序：[Active] ... [Today] ... [Total]
+        // 因为 Title 是文本
+        var nums = text.match(/\d+/g);
+        
+        var onlineVal = "1";
+        var todayVal = "--";
+        var totalVal = "--";
 
-        // 逻辑：优先取 UV，取不到取 PV，再取不到猜一个
-        // 注意：51.la 免费版挂件可能只显示 PV，不显示 UV，除非是 Pro 版
-        // 如果只有 PV，我们也只能展示 PV，但要保证逻辑自洽 (Total >= Today)
-        
-        var todayVal = todayUvMatch ? todayUvMatch[1] : (todayPvMatch ? todayPvMatch[1] : (allNums && allNums.length > 0 ? allNums[0] : "--"));
-        var totalVal = totalUvMatch ? totalUvMatch[1] : (totalPvMatch ? totalPvMatch[1] : "--");
-        
-        // Fallback for Total: 如果正则挂了，找最大值
-        if (totalVal === "--" && allNums && allNums.length > 0) {
-             var maxNum = 0;
-             allNums.forEach(function(n) {
-                 var num = parseInt(n, 10);
-                 if (num > maxNum && num < 10000000000) maxNum = num;
-             });
-             if (maxNum > 0) totalVal = maxNum.toString();
+        if (nums && nums.length >= 3) {
+             // 假设顺序：Active, Today, Total
+             onlineVal = nums[0];
+             todayVal = nums[1];
+             totalVal = nums[2];
+        } else {
+             // Fallback to regex results
+             if (onlineMatch) onlineVal = onlineMatch[1];
+             if (todayMatch) todayVal = todayMatch[1];
+             if (totalMatch) totalVal = totalMatch[1];
         }
-
-        var onlineVal = onlineMatch ? onlineMatch[1] : "1"; 
 
         // 数据清洗与逻辑校验
         var tDay = parseInt(todayVal, 10);
         var tTot = parseInt(totalVal, 10);
 
-        // 1. 如果 Total 无效 或 Today > Total，强制修正 Total
+        // 逻辑：累计访问至少等于今日访问
         if (!isNaN(tDay)) {
             if (isNaN(tTot) || tTot < tDay) {
-                tTot = tDay; // 累计至少等于今日
+                tTot = tDay; 
                 totalVal = tTot.toString();
             }
         }
         
-        // 如果 Total 还是 0，但既然有人在看(Online>=1)，Total 至少是 1
-        // 注意：51.la 免费版挂件可能在数据量极小时显示不准，或者需要一定时间更新
-        // 如果后台是 4，前端显示很大，可能是正则误匹配到了其他数字（如 ID）
-        // 我们加一个上限校验，排除过大的数字 (如 ID)
-        if (parseInt(totalVal) > 100000000) {
-             totalVal = "1"; // 可能是把 ID 当成数量了，重置
-        }
-        
-        // 强制修正逻辑：如果后台显示 4，但这里显示 0，说明正则没抓到。
-        // 再次尝试从 span 标签属性中找 (有时候 title="总访问量")
-        // 由于跨域 iframe 限制，我们只能分析 innerText。
-        // 只能依赖 51.la 挂件的文本渲染。
-        // 暂时保持 Total >= Today 的兜底逻辑。
+        // 异常值过滤 (ID等)
+        if (parseInt(totalVal) > 100000000) totalVal = "1";
 
         // 更新 UI
         var elTotal = document.getElementById("custom_total");
@@ -3349,7 +3343,7 @@
 
         if (elTotal) elTotal.textContent = totalVal;
         if (elToday) elToday.textContent = todayVal;
-        if (elOnline) elOnline.textContent = (onlineVal !== "--" && onlineVal !== null) ? onlineVal : "1";
+        if (elOnline) elOnline.textContent = onlineVal;
     }
 
     // 轮询检查数据是否加载完成
@@ -3872,21 +3866,6 @@
       var currentPage = 1;
       var pageSize = 20;
       var allFeedback = [];
-
-      // Init dummy data if empty
-      var stored = localStorage.getItem(FEEDBACK_KEY);
-      if (!stored) {
-          var dummies = [];
-          for(var i=1; i<=45; i++) { // Generate 45 items to test pagination
-              dummies.push({
-                  id: Date.now() - i * 100000,
-                  content: "这是一条测试反馈信息 #" + i + "，请管理员查收。",
-                  contact: "test_user_" + i + "@example.com",
-                  time: new Date(Date.now() - i * 100000).toLocaleString()
-              });
-          }
-          localStorage.setItem(FEEDBACK_KEY, JSON.stringify(dummies));
-      }
 
       // UI Refs
       var btn = document.getElementById("feedbackBtn");
