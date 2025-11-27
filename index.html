@@ -12,7 +12,7 @@
       --card-bg: #ffffff;
       --text-main: #111827;
       --text-sub: #6b7280;
-      --text-muted: #9ca3af;
+      --text-muted: #9ca3af;  
       --accent: #2563eb;
       --border-subtle: #e5e7eb;
       --radius-lg: 18px;
@@ -273,6 +273,41 @@
         opacity: 1;
         transform: translateX(0);
         color: #2563eb;
+    }
+
+    /* 侧边栏底部 Footer (Config & Admin Feedback) */
+    .side-footer {
+        margin-top: auto; /* Push to bottom */
+        padding-top: 16px;
+        border-top: 1px dashed #e2e8f0;
+        display: none; /* Hidden by default, shown by JS if admin */
+        gap: 10px;
+        justify-content: space-evenly;
+    }
+
+    .side-footer-btn {
+        flex: 1;
+        height: 36px;
+        border-radius: 8px;
+        background: #f8fafc;
+        border: 1px solid transparent;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .side-footer-btn:hover {
+        background: #eff6ff;
+        color: #2563eb;
+        border-color: rgba(37, 99, 235, 0.1);
+        transform: translateY(-2px);
+    }
+    .side-footer-btn.is-active {
+        background: #2563eb;
+        color: #ffffff;
     }
 
     /* 右侧主区域 */
@@ -1023,34 +1058,8 @@
     }
 
     /* 配置模式相关样式 */
-    .config-toggle-btn {
-      position: fixed;
-      left: 20px;
-      bottom: 20px;
-      width: 40px;
-      height: 40px;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 50%;
-      display: none; /* 默认隐藏，仅管理员可见 */
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      z-index: 100;
-      transition: all 0.2s;
-      color: #64748b;
-    }
-    .config-toggle-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-      color: #2563eb;
-    }
-    .config-toggle-btn.is-active {
-      background: #2563eb;
-      color: #fff;
-      border-color: #2563eb;
-    }
+    /* 移除旧的浮动样式 */
+    /* .config-toggle-btn { ... } REMOVED */ 
 
     /* 默认隐藏编辑控件 */
     .edit-control {
@@ -1398,10 +1407,12 @@
       opacity: 0;
       visibility: hidden;
       transition: all 0.2s ease;
+      pointer-events: none; /* Add this to prevent clicking when hidden */
     }
     .modal-overlay.is-visible {
       opacity: 1;
       visibility: visible;
+      pointer-events: auto; /* Enable clicks */
     }
     .modal-box {
       background: #fff;
@@ -1446,17 +1457,17 @@
       flex-direction: column;
       gap: 16px;
     }
-    .form-group {
+    .modal-input-group {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
-    .form-label {
+    .modal-input-group label {
       font-size: 13px;
       font-weight: 500;
       color: #475569;
     }
-    .form-input {
+    .modal-input {
       padding: 8px 12px;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
@@ -1465,8 +1476,10 @@
       transition: border-color 0.2s;
       width: 100%;
       box-sizing: border-box;
+      font-family: inherit;
+      resize: vertical;
     }
-    .form-input:focus {
+    .modal-input:focus {
       border-color: #2563eb;
       box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
     }
@@ -1806,6 +1819,109 @@
     </section>
   </div>
 </div>
+
+<div class="feedback-btn" id="feedbackBtn" title="问题反馈">
+  <i class="ri-feedback-line"></i>
+</div>
+
+<div id="feedbackModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>问题反馈</h3>
+      <i class="ri-close-line modal-close" id="feedbackModalClose"></i>
+    </div>
+    <div class="modal-body">
+      <div class="modal-input-group">
+        <label>反馈内容 <span style="color:red">*</span></label>
+        <textarea id="feedbackContent" class="modal-input" rows="4" placeholder="请描述您遇到的问题或建议..."></textarea>
+      </div>
+      <div class="modal-input-group">
+        <label>联系方式 (选填)</label>
+        <input id="feedbackContact" class="modal-input" placeholder="邮箱或微信号，方便我们联系您" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn cancel" id="feedbackCancelBtn">取消</button>
+      <button class="modal-btn confirm" id="feedbackSubmitBtn">提交反馈</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Feedback List Modal -->
+<div id="adminFeedbackModal" class="modal-overlay">
+  <div class="modal-box" style="max-width: 600px; width: 90%;">
+    <div class="modal-header">
+      <h3>反馈列表 (管理员)</h3>
+      <i class="ri-close-line modal-close" id="adminFeedbackClose"></i>
+    </div>
+    <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+      <div id="feedbackListContainer" class="feedback-list">
+        <!-- List items will be injected here -->
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn confirm" id="adminFeedbackConfirmBtn">关闭</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Feedback Button Style */
+.feedback-btn {
+  position: fixed;
+  right: 22px;
+  bottom: 80px; /* Above back-to-top (26px + 40px + 14px gap) */
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #64748b;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  z-index: 50;
+  transition: all 0.3s;
+  border: 1px solid #e2e8f0;
+}
+.feedback-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  color: #2563eb;
+  border-color: #cbd5e1;
+}
+
+/* Feedback List Style */
+.feedback-item {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.feedback-item:last-child { border-bottom: none; }
+.feedback-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #94a3b8;
+}
+.feedback-text {
+  font-size: 14px;
+  color: #334155;
+  line-height: 1.5;
+}
+.feedback-contact {
+  font-size: 12px;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+</style>
 
 <button class="back-to-top" id="backToTop" aria-label="回到顶部"><i class="ri-arrow-up-line"></i></button>
 
@@ -3232,10 +3348,19 @@
             }
         }
         
-        // 2. 如果 Total 还是 0 (可能是新站)，但既然有人在看(Online>=1)，Total 至少是 1
-        if (tTot === 0) {
-            totalVal = "1";
+        // 如果 Total 还是 0，但既然有人在看(Online>=1)，Total 至少是 1
+        // 注意：51.la 免费版挂件可能在数据量极小时显示不准，或者需要一定时间更新
+        // 如果后台是 4，前端显示很大，可能是正则误匹配到了其他数字（如 ID）
+        // 我们加一个上限校验，排除过大的数字 (如 ID)
+        if (parseInt(totalVal) > 100000000) {
+             totalVal = "1"; // 可能是把 ID 当成数量了，重置
         }
+        
+        // 强制修正逻辑：如果后台显示 4，但这里显示 0，说明正则没抓到。
+        // 再次尝试从 span 标签属性中找 (有时候 title="总访问量")
+        // 由于跨域 iframe 限制，我们只能分析 innerText。
+        // 只能依赖 51.la 挂件的文本渲染。
+        // 暂时保持 Total >= Today 的兜底逻辑。
 
         // 更新 UI
         var elTotal = document.getElementById("custom_total");
@@ -3268,16 +3393,16 @@
     var currentIndex = 0;
     var slideInterval = null;
 
-    // 多源 RSS 配置 (国内外 AI 资讯混合，频率 1h 更新)
+    // 多源 RSS 配置 (全中文优质 AI 资讯源)
     // 使用 rss2json API (free tier limits: 1h cache)
     var feedSources = [
       { url: "https://www.jiqizhixin.com/rss", name: "机器之心" },
       { url: "https://www.qbitai.com/feed", name: "量子位" },
-      { url: "https://36kr.com/feed", name: "36氪" },
+      { url: "https://36kr.com/feed/tag/AI", name: "36氪AI" }, // 更精准的分类
       { url: "https://www.aibase.com/feed", name: "AI基地" }, 
       { url: "https://hub.baai.ac.cn/rss", name: "智源社区" },
-      { url: "https://techcrunch.com/category/artificial-intelligence/feed/", name: "TechCrunch" },
-      { url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", name: "The Verge" }
+      { url: "https://www.leiphone.com/feed", name: "雷峰网" }, // 补充
+      { url: "https://cn.technode.com/feed", name: "动点科技" }  // 补充
     ];
 
     // Fallback data
@@ -3576,11 +3701,103 @@
   (function() {
     var urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('admin')) {
-      var btn = document.getElementById('configToggleBtn');
-      if (btn) {
-        btn.style.display = 'flex';
+      var footer = document.getElementById('sideFooter');
+      if (footer) {
+        footer.style.display = 'flex';
       }
     }
+  })();
+
+  // Feedback Logic
+  (function() {
+      var FEEDBACK_KEY = "site_feedback_data";
+      
+      // Init dummy data if empty
+      var stored = localStorage.getItem(FEEDBACK_KEY);
+      if (!stored) {
+          var dummies = [];
+          for(var i=1; i<=10; i++) {
+              dummies.push({
+                  id: Date.now() - i * 100000,
+                  content: "这是一条测试反馈信息 #" + i + "，请管理员查收。",
+                  contact: "test_user_" + i + "@example.com",
+                  time: new Date(Date.now() - i * 100000).toLocaleString()
+              });
+          }
+          localStorage.setItem(FEEDBACK_KEY, JSON.stringify(dummies));
+      }
+
+      // UI Refs
+      var btn = document.getElementById("feedbackBtn");
+      var modal = document.getElementById("feedbackModal");
+      var close = document.getElementById("feedbackModalClose");
+      var cancel = document.getElementById("feedbackCancelBtn");
+      var submit = document.getElementById("feedbackSubmitBtn");
+      var contentInput = document.getElementById("feedbackContent");
+      var contactInput = document.getElementById("feedbackContact");
+
+      // Open/Close User Modal
+      if(btn) btn.onclick = function() { modal.classList.add("is-visible"); };
+      function closeModal() { 
+          modal.classList.remove("is-visible"); 
+          setTimeout(function() {
+            if(contentInput) contentInput.value = "";
+            if(contactInput) contactInput.value = "";
+          }, 200);
+      }
+      if(close) close.onclick = closeModal;
+      if(cancel) cancel.onclick = closeModal;
+
+      // Submit
+      if(submit) submit.onclick = function() {
+          var content = contentInput.value.trim();
+          if (!content) { alert("请输入反馈内容"); return; }
+          
+          var newFeedback = {
+              id: Date.now(),
+              content: content,
+              contact: contactInput.value.trim() || "无联系方式",
+              time: new Date().toLocaleString()
+          };
+          
+          var list = JSON.parse(localStorage.getItem(FEEDBACK_KEY) || "[]");
+          list.unshift(newFeedback);
+          localStorage.setItem(FEEDBACK_KEY, JSON.stringify(list));
+          
+          alert("反馈提交成功！(仅本地演示)");
+          closeModal();
+      };
+
+      // Admin Logic (Global)
+      window.openAdminFeedback = function() {
+          var adminModal = document.getElementById("adminFeedbackModal");
+          var listContainer = document.getElementById("feedbackListContainer");
+          var adminClose = document.getElementById("adminFeedbackClose");
+          var adminConfirm = document.getElementById("adminFeedbackConfirmBtn");
+          
+          var list = JSON.parse(localStorage.getItem(FEEDBACK_KEY) || "[]");
+          listContainer.innerHTML = "";
+          
+          if (list.length === 0) {
+              listContainer.innerHTML = "<div style='padding:20px;text-align:center;color:#94a3b8;'>暂无反馈</div>";
+          } else {
+              list.forEach(function(item) {
+                  var itemEl = document.createElement("div");
+                  itemEl.className = "feedback-item";
+                  itemEl.innerHTML = 
+                      '<div class="feedback-meta"><span>' + item.time + '</span></div>' +
+                      '<div class="feedback-text">' + item.content + '</div>' +
+                      (item.contact ? '<div class="feedback-contact">' + item.contact + '</div>' : '');
+                  listContainer.appendChild(itemEl);
+              });
+          }
+          
+          adminModal.classList.add("is-visible");
+          
+          function closeAdmin() { adminModal.classList.remove("is-visible"); }
+          if(adminClose) adminClose.onclick = closeAdmin;
+          if(adminConfirm) adminConfirm.onclick = closeAdmin;
+      };
   })();
 
 </script>
@@ -3595,5 +3812,6 @@
   </script>
 </body>
 </html>
+
 
 
