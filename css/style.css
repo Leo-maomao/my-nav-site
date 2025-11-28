@@ -1326,6 +1326,12 @@ body.is-config-mode .tool-card-add {
   font-size: 13px;
 }
 
+/* Fix for browser autofill: ensure readonly state looks like normal input */
+.search-main-input[readonly] {
+  background: transparent !important;
+  cursor: text;
+}
+
 .search-main-input::placeholder {
   color: rgba(55, 65, 81, 0.85);
 }
