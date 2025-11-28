@@ -187,7 +187,13 @@
           <div class="search-tab" data-key="image">图片</div>
         </div>
         <div class="search-main">
-          <input id="searchMainInput" class="search-main-input" type="text" name="query_field_no_autofill" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');" placeholder="站内 AI 工具搜索" />
+          <!-- 隐形假输入框：诱导浏览器将自动填充填入这里，从而保护真实的搜索框 -->
+          <div style="position: fixed; top: -9999px; left: -9999px; opacity: 0; pointer-events: none;">
+             <input type="text" name="fake_username_trap" tabindex="-1" aria-hidden="true">
+             <input type="password" name="fake_password_trap" tabindex="-1" aria-hidden="true">
+          </div>
+
+          <input id="searchMainInput" class="search-main-input" type="text" name="site_search_query" autocomplete="off" placeholder="站内 AI 工具搜索" />
           <div class="search-main-icon" id="searchMainButton"><i class="ri-search-line"></i></div>
           <div class="search-main-arrow" id="searchArrow"></div>
         </div>
