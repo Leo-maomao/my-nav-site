@@ -1367,7 +1367,7 @@ var DataService = (function() {
     setInterval(syncData, 1000);
 })();
 
-// 轮播图逻辑
+// 轮播图逻辑 (聚合多源新闻)
 (function() {
     var bannerWrapper = document.getElementById("bannerWrapper");
     var indicatorsEl = document.getElementById("bannerIndicators");
@@ -1379,143 +1379,161 @@ var DataService = (function() {
     var currentIndex = 0;
     var slideInterval = null;
 
-    var feedSources = [
-      { url: "https://rsshub.ktachibana.party/36kr/information/AI", name: "36氪AI" }
-    ];
-
+    // 仅保留加载占位，无旧数据兜底
     var fallbackData = [
-      {
-        title: "OpenAI 发布 GPT-4o 模型，多模态能力大幅提升",
-        link: "https://openai.com/index/hello-gpt-4o/",
-        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1000",
-        source: "OpenAI",
-        description: "OpenAI 推出全新旗舰模型 GPT-4o，具备实时音频、视觉和文本推理能力，向所有用户免费开放。"
-      },
-      {
-        title: "Google I/O 2024：Gemini 全面整合进 Android 系统",
-        link: "https://blog.google/products/android/android-ai-gemini-io-2024/",
-        image: "https://images.unsplash.com/photo-1599507593499-a3f7d7d97667?auto=format&fit=crop&q=80&w=1000",
-        source: "Google",
-        description: "Google 宣布 Gemini 将深入集成到 Android 核心体验中，带来更智能的交互和更强大的上下文理解能力。"
-      },
-      {
-        title: "Apple 推出 Apple Intelligence，重新定义个人智能系统",
-        link: "https://www.apple.com/apple-intelligence/",
-        image: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?auto=format&fit=crop&q=80&w=1000",
-        source: "Apple",
-        description: "Apple 揭晓 Apple Intelligence，将强大的生成式模型置于 iPhone、iPad 和 Mac 的核心，注重隐私保护。"
-      },
-      {
-        title: "Anthropic 发布 Claude 3.5 Sonnet，编码能力超越 GPT-4o",
-        link: "https://www.anthropic.com/news/claude-3-5-sonnet",
-        image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=1000",
-        source: "Anthropic",
-        description: "Claude 3.5 Sonnet 正式发布，在推理、编码和视觉任务上树立了新的行业基准，运行速度提升两倍。"
-      },
-      {
-        title: "Midjourney v6.1 版本更新，图像细节与连贯性增强",
-        link: "https://www.midjourney.com",
-        image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=1000",
-        source: "Midjourney",
-        description: "Midjourney v6.1 带来更逼真的纹理、更准确的解剖结构和更快的生成速度，图像质量再上新台阶。"
-      }
+        { title: "正在从 36Kr 获取最新 AI 资讯...", description: "请稍候，数据同步中...", image: "", link: "#" }
     ];
 
-    function extractImage(item) {
-        // 1. Enclosure (Standard RSS)
-        if (item.enclosure && item.enclosure.link) return item.enclosure.link;
-        
-        // 2. Thumbnail (rss2json specific)
-        if (item.thumbnail && item.thumbnail.length > 0) return item.thumbnail;
-        
-        // 3. Content Scraping (The most reliable fallback)
-        var html = item.content || item.description || "";
-        
-        // Match src or data-src (lazy loading)
-        // Support single and double quotes
-        var match = /<img[^>]+(?:src|data-src)=['"]([^'"]+)['"]/i.exec(html);
-        if (match && match[1]) {
-            return match[1];
-        }
-
-        return null;
-    }
-    
-    function extractDescription(item) {
-        var html = item.description || item.content || "";
-        // Strip HTML tags using a temporary element
-        var div = document.createElement("div");
-        div.innerHTML = html;
-        var text = div.textContent || div.innerText || "";
-        return text.trim();
-    }
-
-    // Generate a deterministic gradient based on title hash
-    function getGradient(title) {
-        var hash = 0;
-        for (var i = 0; i < title.length; i++) {
-            hash = title.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        
-        var hues = [
-            [220, 260], // Blue -> Purple
-            [260, 300], // Purple -> Pink
-            [320, 360], // Pink -> Red
-            [180, 220], // Cyan -> Blue
-            [140, 180], // Green -> Cyan
-            [20, 60],   // Orange -> Yellow
-            [0, 40]     // Red -> Orange
-        ];
-        
-        var huePair = hues[Math.abs(hash) % hues.length];
-        var h1 = huePair[0];
-        var h2 = huePair[1];
-        
-        return "linear-gradient(135deg, hsl(" + h1 + ", 70%, 60%) 0%, hsl(" + h2 + ", 70%, 60%) 100%)";
-    }
-
+    // 轮播图逻辑 (零容忍版：IT之家 + 极客公园，无图直接丢弃)
     function fetchNews() {
-        var promises = feedSources.map(function(source) {
-            // Add cache busting
-            var apiUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(source.url) + "&t=" + Date.now();
-            
-            return fetch(apiUrl)
+        var CACHE_KEY = "nav_banner_strict_image_v1";
+        
+        // 1. 检查缓存
+        var cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+            try {
+                var parsed = JSON.parse(cached);
+                // 缓存 20 分钟
+                if (Date.now() - parsed.time < 1200000 && parsed.data.length > 0) {
+                    console.log("Using cached banner data");
+                    initSlider(parsed.data);
+                    return; 
+                }
+            } catch(e) {}
+        }
+
+        if (loadingEl) loadingEl.style.display = "flex";
+
+        // 2. 定义数据源 (已移除量子位)
+        var sources = [
+            // 极客公园：科技深度报道，封面图通常很规范
+            { url: "https://www.geekpark.net/rss", name: "GeekPark", type: "tech_mix" },
+            // IT之家：智能时代频道，Enclosure 字段通常带图
+            { url: "https://www.ithome.com/rss/", name: "ITHome", type: "tech_mix" }
+        ];
+
+        // 关键词库
+        var aiKeywords = /AI|人工智能|GPT|大模型|OpenAI|Claude|Gemini|Sora|LLM|算力|英伟达|NVIDIA|机器人|深度学习|自动驾驶|脑机接口|黑科技|算法|机器学习|Apple Intelligence|Copilot|DeepSeek|智谱|Kimi|元宝|豆包|通义千问/i;
+        var techGiants = /谷歌|Google|微软|Microsoft|苹果|Apple|华为|Huawei|百度|阿里|腾讯|字节|ByteDance/i;
+
+        var requests = sources.map(function(src) {
+            return fetch("https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(src.url))
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
                     if (data.status === "ok" && data.items) {
                         return data.items.map(function(item) {
-                            return {
-                                title: item.title,
-                                link: item.link,
-                                pubDate: new Date(item.pubDate), 
-                                image: extractImage(item),
-                                source: source.name,
-                                description: extractDescription(item)
-                            };
+                            item._sourceName = src.name;
+                            item._sourceType = src.type;
+                            return item;
                         });
                     }
                     return [];
                 })
-                .catch(function(e) { 
-                    console.warn("Feed fetch failed: " + source.name, e);
-                    return []; 
-                });
+                .catch(function() { return []; });
         });
 
-        Promise.all(promises).then(function(results) {
-            var allNews = [].concat.apply([], results);
-            // Sort by date descending
-            allNews.sort(function(a, b) { return b.pubDate - a.pubDate; });
-            
-            // Since only one source (36Kr), take top 5
-            var finalNews = allNews.slice(0, 5);
+        Promise.all(requests).then(function(results) {
+            var allItems = [];
+            results.forEach(function(items) { allItems = allItems.concat(items); });
 
-            if (finalNews.length > 0) {
-                initSlider(finalNews);
+            // 3. 数据清洗与过滤
+            var processed = [];
+            var titleSet = new Set(); 
+
+            allItems.forEach(function(item) {
+                // 3.1 关键词过滤
+                var textToCheck = item.title + " " + (item.description || "");
+                if (!aiKeywords.test(textToCheck) && !techGiants.test(item.title)) {
+                    return;
+                }
+
+                // 3.2 去重
+                var shortTitle = item.title.substring(0, 10);
+                if (titleSet.has(shortTitle)) return;
+                titleSet.add(shortTitle);
+
+                // 3.3 图片提取 (严格模式)
+                var img = "";
+                // 策略A: Enclosure
+                if (item.enclosure && item.enclosure.link) img = item.enclosure.link;
+                // 策略B: Thumbnail
+                if (!img && item.thumbnail) img = item.thumbnail;
+                // 策略C: Content/Description 中的 img 标签
+                if (!img) {
+                    var content = item.content || item.description || "";
+                    var imgMatch = /<img[^>]+src=['"]([^'"]+\.(?:jpg|jpeg|png|webp))['"]/i.exec(content);
+                    if (!imgMatch) imgMatch = /<img[^>]+src=['"]([^'"]+)['"]/i.exec(content);
+                    if (imgMatch) img = imgMatch[1];
+                }
+
+                // 【关键】零容忍：没有图片？直接 Return！
+                if (!img) return;
+
+                // 3.4 格式化
+                if (item.title) {
+                    var rawDesc = (item.description || item.content || item.title).replace(/<[^>]+>/g, "");
+                    rawDesc = rawDesc.replace(/阅读全文|Read more|Source|Details/gi, "").trim();
+                    var desc = rawDesc.substring(0, 70) + "...";
+
+                    processed.push({
+                        title: item.title,
+                        link: item.link,
+                        image: img, 
+                        description: desc,
+                        pubDate: new Date(item.pubDate.replace(/-/g, "/")),
+                        source: item._sourceName
+                    });
+                }
+            });
+
+            // 4. 排序
+            processed.sort(function(a, b) { return b.pubDate - a.pubDate; });
+
+            // 5. 截取前 5 条 (因为前面已经过滤了无图的，所以这里剩下的肯定都是有图的)
+            var finalData = processed.slice(0, 5);
+
+            if (finalData.length > 0) {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), data: finalData }));
+                initSlider(finalData);
             } else {
-                initSlider(fallbackData);
+                // 如果过滤完一条都没了，用 36Kr 的保底数据
+                useFallback();
             }
+        })
+        .catch(function(e) {
+            console.error("Fetch News Failed:", e);
+            useFallback();
         });
+
+        function useFallback() {
+             var fallbackData = [
+                {
+                    title: "OpenAI 2030年或面临2070亿美元缺口",
+                    link: "https://36kr.com/p/3073752934",
+                    image: "https://img.36krcdn.com/hsossms/20251128/v2_6e83e66ba8954a25be9aedab03759650@5888275@ai_oswg1205372oswg1053oswg495_img_png~tplv-1marlgjv7f-ai-v3:600:400:600:400:q70.jpg?x-oss-process=image/format,webp",
+                    description: "OpenAI距离盈利仍然遥遥无期",
+                    pubDate: Date.now()
+                },
+                 {
+                    title: "为什么一级市场需要“十年不可证伪”的大赛道？",
+                    link: "https://36kr.com/p/3073579911",
+                    image: "https://img.36krcdn.com/hsossms/20251128/v2_1d640ffb6f04fad87c13b38275@ai_oswg1058153oswg1053oswg495_img_png?x-oss-process=image/format,webp",
+                    description: "当所有人都在喊AI泡沫时，真正的泡沫在哪里？",
+                    pubDate: Date.now() - 3600000
+                }
+            ];
+            initSlider(fallbackData);
+        }
+    }
+
+    function getGradient(text) {
+        var hash = 0;
+        for (var i = 0; i < text.length; i++) {
+            hash = text.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        var c1 = Math.floor(Math.abs(Math.sin(hash) * 360));
+        var c2 = (c1 + 40) % 360;
+        return "linear-gradient(135deg, hsl(" + c1 + ", 70%, 80%), hsl(" + c2 + ", 70%, 90%))";
     }
 
     function initSlider(data) {
@@ -1527,15 +1545,13 @@ var DataService = (function() {
         var slide = document.createElement("div");
         slide.className = "banner-slide" + (index === 0 ? " active" : "");
         
-        // 1. Base Layer: Gradient (always present as fallback)
-        var gradient = getGradient(item.title);
+        // 1. Base Layer: Gradient
+        var gradient = getGradient(item.title || "News");
         slide.style.background = gradient;
         
         // 2. Content Layer (Text)
         var content = document.createElement("div");
         content.className = "banner-content";
-        
-        // No Source Tag
         
         var title = document.createElement("h3");
         title.className = "banner-title";
@@ -1553,10 +1569,10 @@ var DataService = (function() {
             var img = document.createElement("img");
             img.src = item.image;
             img.className = "banner-image";
-            img.referrerPolicy = "no-referrer"; // Bypass some hotlink protections
-            img.loading = index === 0 ? "eager" : "lazy"; // Optimisation
+            img.referrerPolicy = "no-referrer"; 
+            img.loading = index === 0 ? "eager" : "lazy";
             
-            // Image Styles (injected here or in CSS)
+            // JS 控制样式确保覆盖
             img.style.position = "absolute";
             img.style.top = "0";
             img.style.left = "0";
@@ -1566,20 +1582,17 @@ var DataService = (function() {
             img.style.zIndex = "1";
             img.style.transition = "opacity 0.3s";
             
-            // Check for tracking pixels or load errors
             img.onload = function() {
+                // 过滤小图
                 if (this.width < 150 || this.height < 100) {
-                    // Too small, hide it -> show gradient
                     this.style.opacity = "0";
                     slide.classList.add("text-mode");
                 } else {
-                    // Loaded successfully
                     slide.classList.remove("text-mode");
                 }
             };
             
             img.onerror = function() {
-                // Failed to load, hide it -> show gradient
                 this.style.display = "none";
                 slide.classList.add("text-mode");
             };
@@ -1592,7 +1605,7 @@ var DataService = (function() {
         slide.appendChild(content);
         
         slide.onclick = function() {
-           window.open(item.link, "_blank");
+           if (item.link) window.open(item.link, "_blank");
         };
         
         bannerWrapper.appendChild(slide);
@@ -1647,6 +1660,7 @@ var DataService = (function() {
       slideInterval = setInterval(nextSlide, 5000);
     }
 
+    // Start Fetch
     fetchNews();
 })();
 
