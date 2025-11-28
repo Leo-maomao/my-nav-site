@@ -1380,13 +1380,7 @@ var DataService = (function() {
     var slideInterval = null;
 
     var feedSources = [
-      { url: "https://www.jiqizhixin.com/rss", name: "机器之心" },
-      { url: "https://www.qbitai.com/feed", name: "量子位" },
-      { url: "https://36kr.com/feed/tag/AI", name: "36氪AI" }, 
-      { url: "https://www.aibase.com/feed", name: "AI基地" }, 
-      { url: "https://hub.baai.ac.cn/rss", name: "智源社区" },
-      { url: "https://www.leiphone.com/feed", name: "雷峰网" }, 
-      { url: "https://cn.technode.com/feed", name: "动点科技" } 
+      { url: "https://rsshub.ktachibana.party/36kr/information/AI", name: "36氪AI" }
     ];
 
     var fallbackData = [
@@ -1394,104 +1388,97 @@ var DataService = (function() {
         title: "OpenAI 发布 GPT-4o 模型，多模态能力大幅提升",
         link: "https://openai.com/index/hello-gpt-4o/",
         image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1000",
-        source: "OpenAI"
+        source: "OpenAI",
+        description: "OpenAI 推出全新旗舰模型 GPT-4o，具备实时音频、视觉和文本推理能力，向所有用户免费开放。"
       },
       {
         title: "Google I/O 2024：Gemini 全面整合进 Android 系统",
         link: "https://blog.google/products/android/android-ai-gemini-io-2024/",
         image: "https://images.unsplash.com/photo-1599507593499-a3f7d7d97667?auto=format&fit=crop&q=80&w=1000",
-        source: "Google"
+        source: "Google",
+        description: "Google 宣布 Gemini 将深入集成到 Android 核心体验中，带来更智能的交互和更强大的上下文理解能力。"
       },
       {
         title: "Apple 推出 Apple Intelligence，重新定义个人智能系统",
         link: "https://www.apple.com/apple-intelligence/",
         image: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?auto=format&fit=crop&q=80&w=1000",
-        source: "Apple"
+        source: "Apple",
+        description: "Apple 揭晓 Apple Intelligence，将强大的生成式模型置于 iPhone、iPad 和 Mac 的核心，注重隐私保护。"
       },
       {
         title: "Anthropic 发布 Claude 3.5 Sonnet，编码能力超越 GPT-4o",
         link: "https://www.anthropic.com/news/claude-3-5-sonnet",
         image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=1000",
-        source: "Anthropic"
+        source: "Anthropic",
+        description: "Claude 3.5 Sonnet 正式发布，在推理、编码和视觉任务上树立了新的行业基准，运行速度提升两倍。"
       },
       {
         title: "Midjourney v6.1 版本更新，图像细节与连贯性增强",
         link: "https://www.midjourney.com",
         image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=1000",
-        source: "Midjourney"
+        source: "Midjourney",
+        description: "Midjourney v6.1 带来更逼真的纹理、更准确的解剖结构和更快的生成速度，图像质量再上新台阶。"
       }
     ];
 
     function extractImage(item) {
-        if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.indexOf('image') !== -1) {
-            return item.enclosure.link;
-        }
-        if (item.thumbnail) return item.thumbnail;
+        // 1. Enclosure (Standard RSS)
+        if (item.enclosure && item.enclosure.link) return item.enclosure.link;
         
-        var html = (item.description || "") + (item.content || "");
-        var imgRegex = /<img[^>]+src="([^">]+)"/i;
-        var match = html.match(imgRegex);
-        if (match && match[1]) return match[1];
+        // 2. Thumbnail (rss2json specific)
+        if (item.thumbnail && item.thumbnail.length > 0) return item.thumbnail;
+        
+        // 3. Content Scraping (The most reliable fallback)
+        var html = item.content || item.description || "";
+        
+        // Match src or data-src (lazy loading)
+        // Support single and double quotes
+        var match = /<img[^>]+(?:src|data-src)=['"]([^'"]+)['"]/i.exec(html);
+        if (match && match[1]) {
+            return match[1];
+        }
 
         return null;
     }
-
-    function getRandomFallbackImage(index) {
-        var images = [
-            "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800",
-            "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=800",
-            "https://images.unsplash.com/photo-1599507593499-a3f7d7d97667?auto=format&fit=crop&q=80&w=800",
-            "https://images.unsplash.com/photo-1617791160505-6f00504e3519?auto=format&fit=crop&q=80&w=800",
-            "https://images.unsplash.com/photo-1531297461137-3635ebef57a6?auto=format&fit=crop&q=80&w=800"
-        ];
-        return images[index % images.length];
+    
+    function extractDescription(item) {
+        var html = item.description || item.content || "";
+        // Strip HTML tags using a temporary element
+        var div = document.createElement("div");
+        div.innerHTML = html;
+        var text = div.textContent || div.innerText || "";
+        return text.trim();
     }
 
-    function getRelevantImage(title) {
-        if (!title) return getRandomFallbackImage(0);
-        
-        var t = title.toLowerCase();
-        
-        if (t.includes("apple") || t.includes("iphone") || t.includes("mac") || t.includes("ios")) 
-            return "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800&q=80";
-        if (t.includes("google") || t.includes("gemini") || t.includes("android") || t.includes("pixel")) 
-            return "https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=800&q=80";
-        if (t.includes("openai") || t.includes("gpt") || t.includes("chatgpt")) 
-            return "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80";
-        if (t.includes("microsoft") || t.includes("copilot") || t.includes("bing")) 
-            return "https://images.unsplash.com/photo-1633419461186-7d75076e474b?w=800&q=80";
-        if (t.includes("tesla") || t.includes("robot") || t.includes("musk")) 
-            return "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80";
-        if (t.includes("code") || t.includes("python") || t.includes("github") || t.includes("dev")) 
-            return "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80";
-        if (t.includes("image") || t.includes("video") || t.includes("midjourney") || t.includes("sora")) 
-            return "https://images.unsplash.com/photo-1535378437327-525e99493c56?w=800&q=80";
-        if (t.includes("chip") || t.includes("nvidia") || t.includes("hardware")) 
-            return "https://images.unsplash.com/photo-1555664424-778a1e5e1b48?w=800&q=80";
-
+    // Generate a deterministic gradient based on title hash
+    function getGradient(title) {
         var hash = 0;
         for (var i = 0; i < title.length; i++) {
             hash = title.charCodeAt(i) + ((hash << 5) - hash);
         }
-        var index = Math.abs(hash);
         
-        var pool = [
-            "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80", 
-            "https://images.unsplash.com/photo-1531297461137-3635ebef57a6?w=800&q=80", 
-            "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80", 
-            "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80", 
-            "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80", 
-            "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80", 
-            "https://images.unsplash.com/photo-1504384308090-c54be3855462?w=800&q=80", 
-            "https://images.unsplash.com/photo-1620825937374-87fc7d6bddc2?w=800&q=80"  
+        var hues = [
+            [220, 260], // Blue -> Purple
+            [260, 300], // Purple -> Pink
+            [320, 360], // Pink -> Red
+            [180, 220], // Cyan -> Blue
+            [140, 180], // Green -> Cyan
+            [20, 60],   // Orange -> Yellow
+            [0, 40]     // Red -> Orange
         ];
         
-        return pool[index % pool.length];
+        var huePair = hues[Math.abs(hash) % hues.length];
+        var h1 = huePair[0];
+        var h2 = huePair[1];
+        
+        return "linear-gradient(135deg, hsl(" + h1 + ", 70%, 60%) 0%, hsl(" + h2 + ", 70%, 60%) 100%)";
     }
 
     function fetchNews() {
         var promises = feedSources.map(function(source) {
+            // Add cache busting
             var apiUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(source.url) + "&t=" + Date.now();
+            
             return fetch(apiUrl)
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
@@ -1502,7 +1489,8 @@ var DataService = (function() {
                                 link: item.link,
                                 pubDate: new Date(item.pubDate), 
                                 image: extractImage(item),
-                                source: source.name
+                                source: source.name,
+                                description: extractDescription(item)
                             };
                         });
                     }
@@ -1516,15 +1504,11 @@ var DataService = (function() {
 
         Promise.all(promises).then(function(results) {
             var allNews = [].concat.apply([], results);
+            // Sort by date descending
             allNews.sort(function(a, b) { return b.pubDate - a.pubDate; });
+            
+            // Since only one source (36Kr), take top 5
             var finalNews = allNews.slice(0, 5);
-
-            finalNews = finalNews.map(function(item, idx) {
-                if (!item.image || item.image.length < 10) {
-                    item.image = getRelevantImage(item.title);
-                }
-                return item;
-            });
 
             if (finalNews.length > 0) {
                 initSlider(finalNews);
@@ -1543,48 +1527,73 @@ var DataService = (function() {
         var slide = document.createElement("div");
         slide.className = "banner-slide" + (index === 0 ? " active" : "");
         
-        var imgObj = new Image();
-        imgObj.src = item.image;
-        slide.style.background = "linear-gradient(135deg, #cbd5e1 0%, #f1f5f9 100%)"; 
+        // 1. Base Layer: Gradient (always present as fallback)
+        var gradient = getGradient(item.title);
+        slide.style.background = gradient;
         
-        imgObj.onload = function() {
-            if (this.width < 150 || this.height < 100) {
-                console.warn("Image too small (likely tracking pixel):", item.image);
-                var fallbackUrl = getRelevantImage(item.title);
-                if (fallbackUrl !== item.image) {
-                    slide.style.backgroundImage = "url('" + fallbackUrl + "')";
-                }
-            } else {
-                slide.style.backgroundImage = "url('" + item.image + "')";
-            }
-        };
-        imgObj.onerror = function() {
-            console.warn("Image failed to load:", item.image);
-            var fallbackUrl = getRelevantImage(item.title);
-            if (fallbackUrl !== item.image) {
-                slide.style.backgroundImage = "url('" + fallbackUrl + "')";
-            }
-        };
-        
-        slide.style.backgroundImage = "url('" + item.image + "')";
-        slide.onclick = function() {
-           window.open(item.link, "_blank");
-        };
-        
+        // 2. Content Layer (Text)
         var content = document.createElement("div");
         content.className = "banner-content";
         
-        var tag = document.createElement("span");
-        tag.className = "banner-tag";
-        tag.textContent = item.source || "AI News";
+        // No Source Tag
         
         var title = document.createElement("h3");
         title.className = "banner-title";
         title.textContent = item.title;
         
-        content.appendChild(tag);
+        var desc = document.createElement("div");
+        desc.className = "banner-desc";
+        desc.textContent = item.description || "";
+        
         content.appendChild(title);
+        content.appendChild(desc);
+        
+        // 3. Image Layer (Optional)
+        if (item.image) {
+            var img = document.createElement("img");
+            img.src = item.image;
+            img.className = "banner-image";
+            img.referrerPolicy = "no-referrer"; // Bypass some hotlink protections
+            img.loading = index === 0 ? "eager" : "lazy"; // Optimisation
+            
+            // Image Styles (injected here or in CSS)
+            img.style.position = "absolute";
+            img.style.top = "0";
+            img.style.left = "0";
+            img.style.width = "100%";
+            img.style.height = "100%";
+            img.style.objectFit = "cover";
+            img.style.zIndex = "1";
+            img.style.transition = "opacity 0.3s";
+            
+            // Check for tracking pixels or load errors
+            img.onload = function() {
+                if (this.width < 150 || this.height < 100) {
+                    // Too small, hide it -> show gradient
+                    this.style.opacity = "0";
+                    slide.classList.add("text-mode");
+                } else {
+                    // Loaded successfully
+                    slide.classList.remove("text-mode");
+                }
+            };
+            
+            img.onerror = function() {
+                // Failed to load, hide it -> show gradient
+                this.style.display = "none";
+                slide.classList.add("text-mode");
+            };
+            
+            slide.appendChild(img);
+        } else {
+            slide.classList.add("text-mode");
+        }
+
         slide.appendChild(content);
+        
+        slide.onclick = function() {
+           window.open(item.link, "_blank");
+        };
         
         bannerWrapper.appendChild(slide);
       });
