@@ -1321,39 +1321,66 @@ var DataService = (function() {
 
         var text = container.textContent || container.innerText || "";
         
-        if (!text.trim()) return;
+        // 简单清洗
+        text = text.replace(/\s+/g, " ").trim();
         
-        var onlineMatch = text.match(/(\d+).*?(?:活跃|在线|Current)/) || text.match(/(?:活跃|在线|Current).*?(\d+)/);
-        var todayMatch  = text.match(/(\d+).*?(?:今日|Today)/) || text.match(/(?:今日|Today).*?(\d+)/);
-        var totalMatch  = text.match(/(\d+).*?(?:总|Total)/) || text.match(/(?:总|Total).*?(\d+)/);
+        if (!text) return;
+        
+        // 尝试通过标签匹配 (正则更加宽容)
+        // 匹配模式： "标签" 后面跟着 "数字"
+        
+        // 1. 在线 (Online)
+        var onlineMatch = text.match(/(?:活跃|在线|Current)[^0-9]*(\d+)/i);
+        
+        // 2. 今日 (Today) - 优先取 PV (访问量)，如果没有取 UV (访客)
+        var todayMatch = text.match(/(?:今日|Today)[^0-9]*PV[^0-9]*(\d+)/i) || 
+                         text.match(/(?:今日|Today)[^0-9]*(\d+)/i); // 宽泛匹配
+        
+        // 3. 累计 (Total) - 优先取 PV (总访问量)
+        var totalMatch = text.match(/(?:总|Total)[^0-9]*PV[^0-9]*(\d+)/i) || 
+                         text.match(/(?:总|Total)[^0-9]*(\d+)/i); // 宽泛匹配
 
+        // 纯数字提取 (作为最后的兜底)
+        // 51.la 默认顺序 (全开时): TotalPV, TotalUV, TotalIP, TodayPV, TodayUV, TodayIP, Yest, Online
         var nums = text.match(/\d+/g);
         
         var onlineVal = "1";
         var todayVal = "--";
         var totalVal = "--";
 
-        if (nums && nums.length >= 3) {
-             onlineVal = nums[0];
-             todayVal = nums[1];
-             totalVal = nums[2];
-        } else {
-             if (onlineMatch) onlineVal = onlineMatch[1];
-             if (todayMatch) todayVal = todayMatch[1];
-             if (totalMatch) totalVal = totalMatch[1];
+        // 策略 A: 正则匹配成功
+        if (onlineMatch) onlineVal = onlineMatch[1];
+        if (todayMatch) todayVal = todayMatch[1];
+        if (totalMatch) totalVal = totalMatch[1];
+
+        // 策略 B: 正则失败，使用位置兜底 (假设 display=1,1,1,1,1,1,0,1)
+        if (todayVal === "--" && nums && nums.length >= 4) {
+            // 假设 nums[3] 是 TodayPV (第4个)
+            todayVal = nums[3];
+        }
+        if (totalVal === "--" && nums && nums.length >= 1) {
+            // 假设 nums[0] 是 TotalPV (第1个)
+            totalVal = nums[0];
+        }
+        if (onlineVal === "1" && nums && nums.length > 0) {
+            // Online 通常是最后一个
+            onlineVal = nums[nums.length - 1];
         }
 
+        // 逻辑校验与格式化
         var tDay = parseInt(todayVal, 10);
         var tTot = parseInt(totalVal, 10);
 
         if (!isNaN(tDay)) {
+            // 如果累计小于今日 (逻辑错误)，强制修正
             if (isNaN(tTot) || tTot < tDay) {
                 tTot = tDay; 
                 totalVal = tTot.toString();
             }
         }
         
-        if (parseInt(totalVal) > 100000000) totalVal = "1";
+        // 异常大数过滤 (防止抓到 ID)
+        if (parseInt(totalVal) > 1000000000) totalVal = "1";
 
         var elTotal = document.getElementById("custom_total");
         var elToday = document.getElementById("custom_today");
