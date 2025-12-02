@@ -1314,37 +1314,71 @@ var DataService = (function() {
 
 // 访客数据逻辑：从 51.la 隐藏挂件中抓取数据并填入自定义样式
 (function () {
+    var isDataLoaded = false;
+    var retryCount = 0;
+    var maxRetries = 30; // 最多尝试30秒
+
     function syncData() {
         var container = document.getElementById("la_data_container");
-        
-        if (!container) return;
 
-        var text = container.textContent || container.innerText || "";
-        
+        if (!container) {
+            console.warn("[Visitor Stats] Container not found");
+            return;
+        }
+
+        // 获取所有文本内容，包括 iframe 和子元素
+        var text = "";
+        try {
+            // 尝试从所有可能的文本源获取数据
+            text = container.textContent || container.innerText || "";
+
+            // 也尝试从 iframe 中获取 (如果 51.la 使用 iframe)
+            var iframe = container.querySelector("iframe");
+            if (iframe && iframe.contentWindow) {
+                try {
+                    var iframeText = iframe.contentWindow.document.body.textContent || "";
+                    text += " " + iframeText;
+                } catch(e) {
+                    // 跨域限制，忽略
+                }
+            }
+        } catch(e) {
+            console.warn("[Visitor Stats] Error reading container:", e);
+        }
+
         // 简单清洗
         text = text.replace(/\s+/g, " ").trim();
-        
-        if (!text) return;
-        
+
+        if (!text || text.length < 5) {
+            retryCount++;
+            if (retryCount <= maxRetries && retryCount % 5 === 0) {
+                console.log("[Visitor Stats] Waiting for data... (" + retryCount + "/" + maxRetries + ")");
+            }
+            return;
+        }
+
+        if (!isDataLoaded) {
+            console.log("[Visitor Stats] Data loaded:", text.substring(0, 200));
+            isDataLoaded = true;
+        }
+
         // 尝试通过标签匹配 (正则更加宽容)
         // 匹配模式： "标签" 后面跟着 "数字"
-        
+
         // 1. 在线 (Online)
-        var onlineMatch = text.match(/(?:活跃|在线|Current)[^0-9]*(\d+)/i);
-        
+        var onlineMatch = text.match(/(?:活跃|在线|Online|当前)[^0-9]*(\d+)/i);
+
         // 2. 今日 (Today) - 优先取 PV (访问量)，如果没有取 UV (访客)
-        var todayMatch = text.match(/(?:今日|Today)[^0-9]*PV[^0-9]*(\d+)/i) || 
-                         text.match(/(?:今日|Today)[^0-9]*(\d+)/i); // 宽泛匹配
-        
+        var todayMatch = text.match(/(?:今日|Today|今天)[^0-9]*(?:PV|访问)?[^0-9]*(\d+)/i);
+
         // 3. 累计 (Total) - 优先取 PV (总访问量)
-        var totalMatch = text.match(/(?:总|Total)[^0-9]*PV[^0-9]*(\d+)/i) || 
-                         text.match(/(?:总|Total)[^0-9]*(\d+)/i); // 宽泛匹配
+        var totalMatch = text.match(/(?:总计|累计|Total|总)[^0-9]*(?:PV|访问)?[^0-9]*(\d+)/i);
 
         // 纯数字提取 (作为最后的兜底)
         // 51.la 默认顺序 (全开时): TotalPV, TotalUV, TotalIP, TodayPV, TodayUV, TodayIP, Yest, Online
         var nums = text.match(/\d+/g);
-        
-        var onlineVal = "1";
+
+        var onlineVal = "--";
         var todayVal = "--";
         var totalVal = "--";
 
@@ -1354,33 +1388,42 @@ var DataService = (function() {
         if (totalMatch) totalVal = totalMatch[1];
 
         // 策略 B: 正则失败，使用位置兜底 (假设 display=1,1,1,1,1,1,0,1)
-        if (todayVal === "--" && nums && nums.length >= 4) {
-            // 假设 nums[3] 是 TodayPV (第4个)
-            todayVal = nums[3];
-        }
-        if (totalVal === "--" && nums && nums.length >= 1) {
-            // 假设 nums[0] 是 TotalPV (第1个)
-            totalVal = nums[0];
-        }
-        if (onlineVal === "1" && nums && nums.length > 0) {
-            // Online 通常是最后一个
-            onlineVal = nums[nums.length - 1];
+        if (nums && nums.length >= 8) {
+            // 根据 display=1,1,1,1,1,1,0,1 参数
+            // nums[0]=TotalPV, nums[3]=TodayPV, nums[7]=Online
+            if (totalVal === "--") totalVal = nums[0];
+            if (todayVal === "--") todayVal = nums[3];
+            if (onlineVal === "--") onlineVal = nums[7];
+        } else if (nums && nums.length >= 4) {
+            // 降级方案：假设至少有 4 个数字
+            if (totalVal === "--") totalVal = nums[0];
+            if (todayVal === "--") todayVal = nums[nums.length > 4 ? 3 : 1];
+            if (onlineVal === "--") onlineVal = nums[nums.length - 1];
         }
 
         // 逻辑校验与格式化
         var tDay = parseInt(todayVal, 10);
         var tTot = parseInt(totalVal, 10);
+        var tOnline = parseInt(onlineVal, 10);
 
-        if (!isNaN(tDay)) {
+        // 数据验证
+        if (!isNaN(tDay) && !isNaN(tTot)) {
             // 如果累计小于今日 (逻辑错误)，强制修正
-            if (isNaN(tTot) || tTot < tDay) {
-                tTot = tDay; 
+            if (tTot < tDay) {
+                tTot = tDay;
                 totalVal = tTot.toString();
             }
         }
-        
-        // 异常大数过滤 (防止抓到 ID)
-        if (parseInt(totalVal) > 1000000000) totalVal = "1";
+
+        // 异常大数过滤 (防止抓到 ID 或时间戳)
+        if (parseInt(totalVal) > 1000000000) totalVal = "--";
+        if (parseInt(todayVal) > 1000000) todayVal = "--";
+        if (parseInt(onlineVal) > 10000) onlineVal = "--";
+
+        // 在线人数至少为 1 (有当前用户)
+        if (onlineVal === "--" || parseInt(onlineVal) < 1) {
+            onlineVal = "1";
+        }
 
         var elTotal = document.getElementById("custom_total");
         var elToday = document.getElementById("custom_today");
@@ -1389,9 +1432,18 @@ var DataService = (function() {
         if (elTotal) elTotal.textContent = totalVal;
         if (elToday) elToday.textContent = todayVal;
         if (elOnline) elOnline.textContent = onlineVal;
+
+        // 只在第一次成功或数据变化时输出日志
+        if (todayVal !== "--" || totalVal !== "--") {
+            console.log("[Visitor Stats] Updated - Online:", onlineVal, "Today:", todayVal, "Total:", totalVal);
+        }
     }
 
-    setInterval(syncData, 1000);
+    // 延迟启动，等待 widget 加载
+    setTimeout(function() {
+        syncData(); // 立即执行一次
+        setInterval(syncData, 2000); // 之后每2秒更新一次
+    }, 3000); // 等待3秒后开始
 })();
 
 // 轮播图逻辑 (聚合多源新闻)
