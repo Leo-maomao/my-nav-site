@@ -1,0 +1,5 @@
+# Cloudflare Pages 配置文件
+build:
+  command: echo "Static site deployed"
+  directory: docs
+  root_dir: /
