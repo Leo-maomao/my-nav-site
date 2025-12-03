@@ -1671,6 +1671,12 @@ body.is-config-mode .tool-card-add {
   justify-content: center;
   font-size: 18px;
   z-index: 60;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.back-to-top:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 35px rgba(15, 23, 42, 0.45);
 }
 
 .back-to-top.is-visible {

@@ -1,8 +1,8 @@
 // Data Service: Encapsulates Database Logic (Supabase)
 var DataService = (function() {
-    var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
+    var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
     // User provided key
-    var SUPABASE_KEY = "sb_publishable_YciLcY3_xL7koCNRhXItoQ_K-78060C"; 
+    var SUPABASE_KEY = "sb_publishable_qyuLpuVm3ERyFaef0rq7uw_fJX2zAAM"; 
     
     var supabase = null;
     var useLocalFallback = false;
