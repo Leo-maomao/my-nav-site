@@ -1,6 +1,0 @@
-name = "my-nav-site"
-compatibility_date = "2024-11-28"
-
-[assets]
-directory = "./docs"
-
