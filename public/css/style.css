@@ -438,7 +438,7 @@ a {
   position: relative;
   z-index: 2;
   display: flex;
-  align-items: center; /* 改为center，让banner保持aspect-ratio */
+  align-items: stretch; /* Stretch to match height */
   justify-content: center;
   gap: 18px; /* Unified gap to match hero-right (18px) */
 }
@@ -446,7 +446,7 @@ a {
 /* Hero Banner Style */
 .hero-banner {
   flex: 1;
-  min-width: 0;
+  min-width: 0; 
   background: #f8fafc;
   border-radius: 16px;
   overflow: hidden;
@@ -456,10 +456,20 @@ a {
   display: flex;
   flex-direction: column;
   width: 100%;
-  /* 统一保持 16:9 比例 */
+  /* 默认移动端比例 */
   height: auto;
   aspect-ratio: 16 / 9;
   background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
+}
+
+/* 桌面端: 自适应高度，与右侧卡片对齐 */
+@media (min-width: 768px) {
+  .hero-banner {
+    height: auto; /* 让 Flexbox Stretch 生效 */
+    align-self: stretch;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
 }
 
 .banner-wrapper {
@@ -475,9 +485,8 @@ a {
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: cover; /* 确保图片覆盖整个区域 */
-  background-position: center; /* 居中显示 */
-  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
   z-index: 1;
