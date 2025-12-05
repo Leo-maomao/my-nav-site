@@ -62,38 +62,8 @@
               <div class="banner-indicators" id="bannerIndicators"></div>
            </div>
         </div>
-        <!-- 左侧：时间日期 -->
-        <div class="hero-left">
-          <div class="flip-clock" id="flipClock">
-            <div class="flip-unit" id="flipHour">
-              <div class="flip-top">00</div>
-              <div class="flip-bottom">00</div>
-            </div>
-            <div class="flip-divider-dots">
-              <span></span><span></span>
-            </div>
-            <div class="flip-unit" id="flipMin">
-              <div class="flip-top">00</div>
-              <div class="flip-bottom">00</div>
-            </div>
-            <div class="flip-divider-dots">
-              <span></span><span></span>
-            </div>
-            <div class="flip-unit" id="flipSec">
-              <div class="flip-top">00</div>
-              <div class="flip-bottom">00</div>
-            </div>
-          </div>
-          
-          <div class="hero-date-container">
-             <div class="hero-date-pill" id="navDate">0000 年 00 月 00 日</div>
-             <div class="hero-date-pill hero-date-pill-sub" id="navExtra">今天 · 周一</div>
-          </div>
-        </div>
-
-         <!-- 右侧：天气与访客 -->
-        <div class="hero-right">
-          <div class="hero-right-row">
+        <!-- 中间：天气 -->
+        <div class="hero-center">
              <div class="weather-block">
                 <div class="weather-header">
                    <div class="weather-info-main">
@@ -141,37 +111,34 @@
                    <div class="weather-forecast-row weather-forecast-icons weather-forecast-icons-low" id="weatherChartIconsLow"></div>
                 </div>
              </div>
-             <div class="visitor-card">
-               <div class="visitor-card-header">
-                 <div class="visitor-card-title">
-                   <i class="ri-bar-chart-2-line"></i>
-                   <span>站点访客</span>
-                 </div>
-               </div>
-               <div class="visitor-card-body" style="position: relative; padding: 0;">
-                 <!-- 自定义样式展示层 -->
-                 <div id="visitor_custom_ui" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
-                    <div class="visitor-metric-row" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #f1f5f9; padding-bottom: 8px;">
-                        <span style="font-size: 12px; color: #64748b;">当前在线</span>
-                        <span id="custom_online" style="font-size: 18px; font-weight: 700; color: #10b981; font-family: 'SF Mono', monospace;">--</span>
-                 </div>
-                    <div class="visitor-metric-row" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #f1f5f9; padding-bottom: 8px;">
-                        <span style="font-size: 12px; color: #64748b;">今日访客</span>
-                        <span id="custom_today" style="font-size: 18px; font-weight: 700; color: #0f172a; font-family: 'SF Mono', monospace;">--</span>
-                 </div>
-                    <div class="visitor-metric-row" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 12px; color: #64748b;">累计访客</span>
-                        <span id="custom_total" style="font-size: 18px; font-weight: 700; color: #0f172a; font-family: 'SF Mono', monospace;">--</span>
-                 </div>
-               </div>
+        </div>
 
-                 <!-- 51.la 原始挂件 (隐藏抓取数据源) -->
-                 <div id="la_data_container" style="position: absolute; top: -9999px; left: -9999px; width: 300px; height: 200px; visibility: hidden;">
-                    <!-- display参数全开，确保能抓到所有数据: TotalPV,TotalUV,TotalIP,TodayPV,TodayUV,TodayIP,Yest,Online -->
-                    <script id="LA-DATA-WIDGET" crossorigin="anonymous" charset="UTF-8" src="https://v6-widget.51.la/v6/3OBuXueXb41ODfzv/quote.js?theme=0&col=true&f=12&badge=icon_0&icon=center&display=1,1,1,1,1,1,0,1"></script>
-                 </div>
-               </div>
-             </div>
+        <!-- 右侧：时间日期 -->
+        <div class="hero-right">
+          <div class="flip-clock" id="flipClock">
+            <div class="flip-unit" id="flipHour">
+              <div class="flip-top">00</div>
+              <div class="flip-bottom">00</div>
+            </div>
+            <div class="flip-divider-dots">
+              <span></span><span></span>
+            </div>
+            <div class="flip-unit" id="flipMin">
+              <div class="flip-top">00</div>
+              <div class="flip-bottom">00</div>
+            </div>
+            <div class="flip-divider-dots">
+              <span></span><span></span>
+            </div>
+            <div class="flip-unit" id="flipSec">
+              <div class="flip-top">00</div>
+              <div class="flip-bottom">00</div>
+            </div>
+          </div>
+
+          <div class="hero-date-container">
+             <div class="hero-date-pill" id="navDate">0000 年 00 月 00 日</div>
+             <div class="hero-date-pill hero-date-pill-sub" id="navExtra">今天 · 周一</div>
           </div>
         </div>
       </div>

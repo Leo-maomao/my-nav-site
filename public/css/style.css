@@ -638,15 +638,12 @@ a {
   z-index: 0;
 }
 
-/* 左侧：时间大卡片 */
-.hero-left {
+/* 中间：天气卡片 */
+.hero-center {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px; /* 稍微减小间距，适应紧凑高度 */
-  flex: 0 0 auto; /* Don't shrink */
-  padding: 0 16px;
+  gap: 18px;
 }
 
 /* 翻页时钟样式 */
@@ -744,23 +741,19 @@ a {
   box-shadow: 0 4px 10px rgba(148, 163, 184, 0.15);
 }
 
-/* 右侧：天气与访客 */
+/* 右侧：时间大卡片 */
 .hero-right {
-  flex: 0 0 580px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-}
-
-.hero-right-row {
-  display: flex;
-  gap: 18px;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 0 0 auto;
+  padding: 0 16px;
 }
 
 /* 天气卡片 */
 .weather-block {
-  flex: 2.4;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -919,90 +912,7 @@ a {
   stroke-width: 0.6;
 }
 
-/* 访客独立卡片 */
-.visitor-card {
-  flex: 1.2;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 18px 18px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 10px;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
-  min-height: 160px;
-}
-
-.visitor-card:hover {
-  background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-  border-color: #cbd5e1;
-}
-
-.visitor-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #64748b;
-}
-
-.visitor-card-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 500;
-  color: #0f172a;
-}
-
-.visitor-card-title i {
-  font-size: 16px;
-  color: #2563eb;
-}
-
-.visitor-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-  justify-content: center;
-}
-
-.visitor-metric {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-
-.visitor-metric-label {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.visitor-metric-value {
-  font-size: 22px;
-  font-weight: 700;
-  color: #111827;
-  font-family: 'SF Mono', 'Menlo', monospace;
-}
-
-.visitor-card-footer {
-  margin-top: 4px;
-  padding-top: 10px;
-  border-top: 1px dashed #e2e8f0;
-  font-size: 11px;
-  color: #9ca3af;
-}
-
-.visitor-trend {
-  font-size: 12px;
-  color: #10b981;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  font-weight: 500;
-}
+/* 访客卡片已移除 */
 
 .weather-footer {
   display: none; /* hidden, moved to header */
