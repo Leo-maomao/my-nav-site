@@ -10,13 +10,10 @@ var DataService = (function() {
     try {
         if (window.supabase) {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log("Supabase initialized");
         } else {
-            console.error("Supabase SDK not loaded");
             useLocalFallback = true;
         }
     } catch (e) {
-        console.error("Supabase Init Error:", e);
         useLocalFallback = true;
     }
 
@@ -34,8 +31,7 @@ var DataService = (function() {
             if (error) throw error;
             return true;
         } catch (e) {
-            console.warn("Supabase Connection Failed (using fallback):", e.message);
-            useLocalFallback = true; 
+            useLocalFallback = true;
             return false;
         }
     }
@@ -112,14 +108,12 @@ var DataService = (function() {
             } else {
                 // DB is empty, try to migrate local data
                 if (localData) {
-                    console.log("Migrating local data to cloud...");
                     var parsed = JSON.parse(localData);
                     await saveToolsData(parsed);
                     return parsed;
                 }
             }
         } catch (e) {
-            console.warn("Load Tools Error (using local cache):", e);
             return localData ? JSON.parse(localData) : null;
         }
         return null;
@@ -134,10 +128,8 @@ var DataService = (function() {
                 .from('config')
                 .upsert({ key: TOOLS_KEY, value: dataJson });
             if (error) throw error;
-            console.log("Tools data synced to cloud");
         } catch (e) {
-            console.error("Save Tools Error:", e);
-            alert("云端同步失败，数据已保存在本地: " + e.message);
+            alert("云端同步失败，数据已保存在本地");
         }
     }
 
@@ -545,10 +537,8 @@ var DataService = (function() {
         
         renderAll(currentData);
         
-        // Check Connection Visual
-        DataService.checkConnection().then(function(ok) {
-            if(!ok) console.warn("Running in offline/local mode");
-        });
+        // Check Connection
+        DataService.checkConnection();
     }
     init();
 
@@ -1106,7 +1096,7 @@ var DataService = (function() {
                   buildChartFromDaily(forecast.daily);
                 })
                 .catch(function (err) {
-                  console.warn("Open-Meteo forecast error", err);
+                  // Forecast fetch failed silently
                 });
             }
           }
@@ -1191,7 +1181,6 @@ var DataService = (function() {
             renderWeather(fakeWttr);
           })
           .catch(function (err) {
-            console.warn("Open-Meteo base fetch failed", err);
             offline();
           });
       }
@@ -1210,7 +1199,6 @@ var DataService = (function() {
             loadByCoords(lat, lon, city);
           })
           .catch(function (err) {
-            console.warn("IP location fetch failed", err);
             offline();
           });
       }
@@ -1317,12 +1305,12 @@ var DataService = (function() {
     var isDataLoaded = false;
     var retryCount = 0;
     var maxRetries = 30; // 最多尝试30秒
+    var containerWarned = false; // 只警告一次
 
     function syncData() {
         var container = document.getElementById("la_data_container");
 
         if (!container) {
-            console.warn("[Visitor Stats] Container not found");
             return;
         }
 
@@ -1343,7 +1331,7 @@ var DataService = (function() {
                 }
             }
         } catch(e) {
-            console.warn("[Visitor Stats] Error reading container:", e);
+            // Error reading container, ignore
         }
 
         // 简单清洗
@@ -1351,16 +1339,10 @@ var DataService = (function() {
 
         if (!text || text.length < 5) {
             retryCount++;
-            if (retryCount <= maxRetries && retryCount % 5 === 0) {
-                console.log("[Visitor Stats] Waiting for data... (" + retryCount + "/" + maxRetries + ")");
-            }
             return;
         }
 
-        if (!isDataLoaded) {
-            console.log("[Visitor Stats] Data loaded:", text.substring(0, 200));
-            isDataLoaded = true;
-        }
+        isDataLoaded = true;
 
         // 尝试通过标签匹配 (正则更加宽容)
         // 匹配模式： "标签" 后面跟着 "数字"
@@ -1432,11 +1414,6 @@ var DataService = (function() {
         if (elTotal) elTotal.textContent = totalVal;
         if (elToday) elToday.textContent = todayVal;
         if (elOnline) elOnline.textContent = onlineVal;
-
-        // 只在第一次成功或数据变化时输出日志
-        if (todayVal !== "--" || totalVal !== "--") {
-            console.log("[Visitor Stats] Updated - Online:", onlineVal, "Today:", todayVal, "Total:", totalVal);
-        }
     }
 
     // 延迟启动，等待 widget 加载
@@ -1474,9 +1451,8 @@ var DataService = (function() {
                 var parsed = JSON.parse(cached);
                 // 缓存 20 分钟
                 if (Date.now() - parsed.time < 1200000 && parsed.data.length > 0) {
-                    console.log("Using cached banner data");
                     initSlider(parsed.data);
-                    return; 
+                    return;
                 }
             } catch(e) {}
         }
@@ -1745,12 +1721,11 @@ var DataService = (function() {
 
 // 51.la Init
 try {
-    // 假设 SDK 已加载
     if (window.LA) {
         LA.init({id:"3OBuXueXb41ODfzv",ck:"3OBuXueXb41ODfzv"});
     }
 } catch (e) {
-    console.warn("LA init failed", e);
+    // LA init failed silently
 }
 
 // Feedback Logic & Pagination
@@ -1890,7 +1865,6 @@ try {
         // 支持 Mac Command 键 (MetaKey)
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'k' || e.key === 'K')) {
             e.preventDefault();
-            console.log("Admin shortcut triggered");
             handleLoginTrigger();
         }
     });
