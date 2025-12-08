@@ -1688,10 +1688,6 @@ body.is-config-mode .tool-card-add {
   margin-bottom: 16px;
 }
 
-.ranking-header .tool-section-header i {
-  color: #2563eb;
-  font-size: 14px;
-}
 
 .ranking-source {
   font-size: 12px;
@@ -1733,15 +1729,10 @@ body.is-config-mode .tool-card-add {
 }
 
 .ranking-card-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #2563eb, #6366f1);
-  color: #fff;
+  color: #2563eb;
+  font-size: 18px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 16px;
 }
 
 .ranking-card-title {
@@ -1776,11 +1767,6 @@ body.is-config-mode .tool-card-add {
 
 .ranking-item:hover {
   background: linear-gradient(to right, #f8fafc, #f1f5f9);
-}
-
-.ranking-item:hover .ranking-visit-btn {
-  opacity: 1;
-  transform: translateX(0);
 }
 
 .ranking-rank {
@@ -1857,11 +1843,12 @@ body.is-config-mode .tool-card-add {
   text-overflow: ellipsis;
 }
 
-.ranking-meta {
+/* 末端区域：全球排名 + 访问按钮 */
+.ranking-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 2px;
+  position: relative;
+  flex-shrink: 0;
 }
 
 .ranking-global-rank {
@@ -1870,6 +1857,7 @@ body.is-config-mode .tool-card-add {
   display: flex;
   align-items: center;
   gap: 3px;
+  transition: opacity 0.2s ease;
 }
 
 .ranking-global-rank i {
@@ -1878,28 +1866,31 @@ body.is-config-mode .tool-card-add {
 
 /* 前往按钮 */
 .ranking-visit-btn {
+  position: absolute;
+  right: 0;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
+  padding: 4px 12px;
   background: linear-gradient(135deg, #2563eb, #3b82f6);
   color: #fff;
   font-size: 11px;
   font-weight: 500;
   border-radius: 6px;
   opacity: 0;
-  transform: translateX(8px);
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
 }
 
 .ranking-visit-btn:hover {
   background: linear-gradient(135deg, #1d4ed8, #2563eb);
 }
 
-.ranking-visit-btn i {
-  font-size: 12px;
+.ranking-item:hover .ranking-global-rank {
+  opacity: 0;
+}
+
+.ranking-item:hover .ranking-visit-btn {
+  opacity: 1;
 }
 
 .ranking-error {

@@ -2167,11 +2167,11 @@ function trackEvent(eventName, params) {
             html += '  </div>';
             html += '  <div class="ranking-info">';
             html += '    <div class="ranking-name">' + tool.name + '</div>';
-            html += '    <div class="ranking-meta">';
-            html += '      <span class="ranking-global-rank"><i class="ri-global-line"></i> 全球 #' + formatGlobalRank(tool.rank) + '</span>';
-            html += '    </div>';
             html += '  </div>';
-            html += '  <div class="ranking-visit-btn"><i class="ri-external-link-line"></i> 前往</div>';
+            html += '  <div class="ranking-actions">';
+            html += '    <span class="ranking-global-rank"><i class="ri-global-line"></i> #' + formatGlobalRank(tool.rank) + '</span>';
+            html += '    <span class="ranking-visit-btn">访问</span>';
+            html += '  </div>';
             html += '</div>';
         }
 
