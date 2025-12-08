@@ -2120,8 +2120,16 @@ function trackEvent(eventName, params) {
         });
     }
 
-    // 获取Logo URL（使用Google Favicon服务）
+    // 自定义Logo覆盖（Google Favicon获取不准确的情况）
+    var CUSTOM_LOGOS = {
+        'seaart.ai': 'https://www.seaart.ai/favicon.ico'
+    };
+
+    // 获取Logo URL
     function getLogoUrl(domain) {
+        if (CUSTOM_LOGOS[domain]) {
+            return CUSTOM_LOGOS[domain];
+        }
         return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=64';
     }
 
