@@ -2133,12 +2133,10 @@ function trackEvent(eventName, params) {
         return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=64';
     }
 
-    // 格式化全球排名显示（四位数以内直接显示，五位数以上用K/M）
+    // 格式化全球排名显示（千万以上用M，其他直接显示）
     function formatGlobalRank(rank) {
-        if (rank >= 1000000) {
+        if (rank >= 10000000) {
             return (rank / 1000000).toFixed(1) + 'M';
-        } else if (rank >= 10000) {
-            return (rank / 1000).toFixed(1) + 'K';
         }
         return rank.toLocaleString();
     }
