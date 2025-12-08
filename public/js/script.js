@@ -366,6 +366,13 @@ var DataService = (function() {
         span.textContent = name;
         span.addEventListener("click", function () {
           activeEngine = name;
+          // 埋点：搜索功能使用
+          if (typeof trackEvent === 'function') {
+            trackEvent('search_use', {
+              search_type: activeTab || '',
+              search_engine: name || ''
+            });
+          }
           renderEngines();
         });
         enginesEl.appendChild(span);
@@ -686,6 +693,14 @@ var DataService = (function() {
                         e.preventDefault();
                     } else {
                         if (!isReadOnly) addToRecent(item); // Only record if from main list
+                        // 埋点：工具卡片点击
+                        if (typeof trackEvent === 'function') {
+                            trackEvent('tool_click', {
+                                tool_name: item.name || '',
+                                tool_url: item.link || '',
+                                category: cat.name || ''
+                            });
+                        }
                     }
                 };
 
@@ -1757,13 +1772,22 @@ try {
 
     if(submit) submit.onclick = function() {
         var content = contentInput.value.trim();
+        var contact = contactInput.value.trim();
         if (!content) { alert("请输入反馈内容"); return; }
-        
-        DataService.submitFeedback(content, contactInput.value.trim());
-        
+
+        DataService.submitFeedback(content, contact);
+
+        // 埋点：反馈提交
+        if (typeof trackEvent === 'function') {
+            trackEvent('feedback_submit', {
+                has_contact: !!contact,
+                content_length: content.length
+            });
+        }
+
         closeModal();
         if (document.getElementById("adminFeedbackModal").classList.contains("is-visible")) {
-            setTimeout(loadFeedbackData, 1000); 
+            setTimeout(loadFeedbackData, 1000);
         }
     };
 
@@ -2015,4 +2039,94 @@ try {
     adjustZoom();
     window.addEventListener('DOMContentLoaded', adjustZoom);
 })();
+
+// ========================================
+// 51.la 埋点追踪模块
+// ========================================
+
+// 埋点工具函数
+function trackEvent(eventName, params) {
+    try {
+        if (window.LA && typeof LA.track === 'function') {
+            LA.track(eventName, params || {});
+        }
+    } catch (e) {
+        // 埋点失败不影响业务
+    }
+}
+
+// 1. 页面访问埋点 (page_view)
+(function() {
+    trackEvent('page_view', {
+        page_name: 'index',
+        page_url: window.location.pathname
+    });
+})();
+
+// 2. 工具卡片点击埋点 (tool_click)
+// 已在 renderTools() 函数的 link.onclick 中实现
+
+// 3. 左侧菜单点击埋点 (sidebar_menu_click)
+(function() {
+    // 博客和Github链接
+    var socialLinks = document.querySelectorAll('.side-social-item');
+    socialLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+            var menuName = this.textContent.trim();
+            var menuUrl = this.getAttribute('href');
+            trackEvent('sidebar_menu_click', {
+                menu_name: menuName,
+                menu_url: menuUrl
+            });
+        });
+    });
+
+    // 分类菜单（动态渲染的，需要在渲染后绑定）
+    // 使用事件委托
+    var sideMenu = document.getElementById('sideMenu');
+    if (sideMenu) {
+        sideMenu.addEventListener('click', function(e) {
+            var menuItem = e.target.closest('.side-menu-item');
+            if (menuItem) {
+                var menuName = menuItem.textContent.trim();
+                trackEvent('sidebar_menu_click', {
+                    menu_name: menuName,
+                    menu_url: '#category'
+                });
+            }
+        });
+    }
+})();
+
+// 4. 搜索功能使用埋点 (search_use)
+// 已在 renderEngines() 函数的搜索引擎切换事件中实现
+
+// 5. Banner点击埋点 (banner_click)
+(function() {
+    // 需要找到Banner元素添加点击监听
+    // 根据实际Banner元素调整选择器
+    var banner = document.querySelector('.banner, .hero, [class*="banner"]');
+    if (banner) {
+        banner.addEventListener('click', function() {
+            trackEvent('banner_click', {
+                banner_position: 'top'
+            });
+        });
+    }
+})();
+
+// 6. 反馈按钮点击埋点 (feedback_button_click)
+(function() {
+    var feedbackBtn = document.getElementById('feedbackBtn') || document.querySelector('[class*="feedback"]');
+    if (feedbackBtn) {
+        feedbackBtn.addEventListener('click', function() {
+            trackEvent('feedback_button_click', {
+                button_position: 'bottom_right'
+            });
+        });
+    }
+})();
+
+// 7. 反馈提交埋点 (feedback_submit)
+// 已在反馈提交按钮的 onclick 事件中实现
 
