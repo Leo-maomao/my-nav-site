@@ -2125,14 +2125,14 @@ function trackEvent(eventName, params) {
         return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=64';
     }
 
-    // 格式化全球排名显示
+    // 格式化全球排名显示（四位数以内直接显示，五位数以上用K/M）
     function formatGlobalRank(rank) {
         if (rank >= 1000000) {
             return (rank / 1000000).toFixed(1) + 'M';
-        } else if (rank >= 1000) {
+        } else if (rank >= 10000) {
             return (rank / 1000).toFixed(1) + 'K';
         }
-        return rank.toString();
+        return rank.toLocaleString();
     }
 
     // 渲染单个榜单

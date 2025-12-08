@@ -1849,48 +1849,78 @@ body.is-config-mode .tool-card-add {
   align-items: center;
   position: relative;
   flex-shrink: 0;
+  min-width: 70px;
+  justify-content: flex-end;
 }
 
 .ranking-global-rank {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #64748b;
   display: flex;
   align-items: center;
-  gap: 3px;
-  transition: opacity 0.2s ease;
+  gap: 4px;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .ranking-global-rank i {
-  font-size: 10px;
+  font-size: 12px;
+  color: #94a3b8;
 }
 
-/* 前往按钮 */
+/* 访问按钮 - 从右侧滑入 */
 .ranking-visit-btn {
   position: absolute;
   right: 0;
   display: flex;
   align-items: center;
-  padding: 4px 12px;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  color: #fff;
-  font-size: 11px;
+  justify-content: center;
+  padding: 5px 14px;
+  font-size: 12px;
   font-weight: 500;
-  border-radius: 6px;
+  letter-spacing: 0.5px;
+  color: #2563eb;
+  background: transparent;
+  border: 1px solid #2563eb;
+  border-radius: 20px;
+  cursor: pointer;
+  overflow: hidden;
   opacity: 0;
-  transition: opacity 0.2s ease;
-  flex-shrink: 0;
+  transform: translateX(20px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.ranking-visit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: -1;
 }
 
 .ranking-visit-btn:hover {
-  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.ranking-visit-btn:hover::before {
+  transform: translateX(0);
 }
 
 .ranking-item:hover .ranking-global-rank {
   opacity: 0;
+  transform: translateX(-10px);
 }
 
 .ranking-item:hover .ranking-visit-btn {
   opacity: 1;
+  transform: translateX(0);
 }
 
 .ranking-error {
