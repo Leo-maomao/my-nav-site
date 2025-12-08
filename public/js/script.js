@@ -2021,6 +2021,14 @@ function trackEvent(eventName, params) {
         'design': 'rankingDesign'
     };
 
+    // 分类中文名映射
+    var CATEGORY_NAMES = {
+        'chat': '聊天对话',
+        'image': '图片生成',
+        'video': '视频生成',
+        'design': '设计创作'
+    };
+
     // 内置AI工具数据（备用，当Supabase不可用时使用）
     var FALLBACK_TOOLS = {
         'chat': [
@@ -2141,8 +2149,17 @@ function trackEvent(eventName, params) {
         return rank.toLocaleString();
     }
 
+    // 排行榜点击埋点
+    function trackRankingClick(category, toolName, domain) {
+        trackEvent('ranking_click', {
+            category: category,
+            tool_name: toolName,
+            domain: domain
+        });
+    }
+
     // 渲染单个榜单
-    function renderRankingList(containerId, tools) {
+    function renderRankingList(containerId, tools, categoryKey) {
         var container = document.getElementById(containerId);
         if (!container) return;
 
@@ -2158,6 +2175,7 @@ function trackEvent(eventName, params) {
             return;
         }
 
+        var categoryName = CATEGORY_NAMES[categoryKey] || categoryKey;
         var html = '';
         for (var i = 0; i < topTools.length; i++) {
             var tool = topTools[i];
@@ -2165,7 +2183,7 @@ function trackEvent(eventName, params) {
             var logoUrl = getLogoUrl(tool.domain);
             var fallbackChar = tool.name.charAt(0).toUpperCase();
 
-            html += '<div class="ranking-item" onclick="window.open(\'https://' + tool.domain + '\', \'_blank\')">';
+            html += '<div class="ranking-item" data-category="' + categoryName + '" data-tool="' + tool.name + '" data-domain="' + tool.domain + '">';
             html += '  <div class="ranking-rank ' + rankClass + '">' + (i + 1) + '</div>';
             html += '  <div class="ranking-logo">';
             html += '    <img src="' + logoUrl + '" alt="' + tool.name + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">';
@@ -2182,6 +2200,18 @@ function trackEvent(eventName, params) {
         }
 
         container.innerHTML = html;
+
+        // 绑定点击事件（使用事件委托）
+        container.onclick = function(e) {
+            var item = e.target.closest('.ranking-item');
+            if (item) {
+                var category = item.getAttribute('data-category');
+                var toolName = item.getAttribute('data-tool');
+                var domain = item.getAttribute('data-domain');
+                trackRankingClick(category, toolName, domain);
+                window.open('https://' + domain, '_blank');
+            }
+        };
     }
 
     // 加载并渲染所有榜单
@@ -2232,7 +2262,7 @@ function trackEvent(eventName, params) {
                 });
                 var containerId = CATEGORY_MAP[cat];
                 if (containerId) {
-                    renderRankingList(containerId, toolsByCategory[cat]);
+                    renderRankingList(containerId, toolsByCategory[cat], cat);
                 }
             });
         }
@@ -2257,7 +2287,7 @@ function trackEvent(eventName, params) {
                 // 每次获取后更新对应榜单
                 var containerId = CATEGORY_MAP[item.category];
                 if (containerId) {
-                    renderRankingList(containerId, toolsByCategory[item.category]);
+                    renderRankingList(containerId, toolsByCategory[item.category], item.category);
                 }
 
                 // 延迟，避免rate limit
