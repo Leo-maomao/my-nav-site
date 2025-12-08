@@ -170,6 +170,56 @@
       </div>
     </section>
 
+    <!-- AI工具榜单 -->
+    <section class="ranking-section">
+      <div class="ranking-header">
+        <h2 class="ranking-title"><i class="ri-bar-chart-box-line"></i> AI工具流量榜</h2>
+        <span class="ranking-source">数据来源: Tranco</span>
+      </div>
+      <div class="ranking-grid" id="rankingGrid">
+        <!-- 聊天对话 -->
+        <div class="ranking-card">
+          <div class="ranking-card-header">
+            <span class="ranking-card-icon"><i class="ri-chat-3-line"></i></span>
+            <span class="ranking-card-title">聊天对话</span>
+          </div>
+          <div class="ranking-list" id="rankingChat">
+            <div class="ranking-loading">加载中...</div>
+          </div>
+        </div>
+        <!-- 图片生成 -->
+        <div class="ranking-card">
+          <div class="ranking-card-header">
+            <span class="ranking-card-icon"><i class="ri-image-ai-line"></i></span>
+            <span class="ranking-card-title">图片生成</span>
+          </div>
+          <div class="ranking-list" id="rankingImage">
+            <div class="ranking-loading">加载中...</div>
+          </div>
+        </div>
+        <!-- 视频生成 -->
+        <div class="ranking-card">
+          <div class="ranking-card-header">
+            <span class="ranking-card-icon"><i class="ri-video-ai-line"></i></span>
+            <span class="ranking-card-title">视频生成</span>
+          </div>
+          <div class="ranking-list" id="rankingVideo">
+            <div class="ranking-loading">加载中...</div>
+          </div>
+        </div>
+        <!-- 设计创作 -->
+        <div class="ranking-card">
+          <div class="ranking-card-header">
+            <span class="ranking-card-icon"><i class="ri-palette-line"></i></span>
+            <span class="ranking-card-title">设计创作</span>
+          </div>
+          <div class="ranking-list" id="rankingDesign">
+            <div class="ranking-loading">加载中...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 工具分类（搜索下方整块罗列各个类别，数据来自 JS 渲染） -->
     <section class="tool-layout">
       <div class="tool-list" id="toolListContainer"></div>

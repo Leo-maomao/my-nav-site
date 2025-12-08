@@ -2004,3 +2004,245 @@ function trackEvent(eventName, params) {
 // 7. 反馈提交埋点 (feedback_submit)
 // 已在反馈提交按钮的 onclick 事件中实现
 
+// ========================================
+// AI工具榜单模块 (Tranco API)
+// ========================================
+(function() {
+    // 配置
+    var TRANCO_API = 'https://tranco-list.eu/api/ranks/domain/';
+    var RANKING_DISPLAY_COUNT = 5; // 每个榜单显示5个
+    var API_DELAY = 1200; // API调用间隔（毫秒），避免rate limit
+
+    // 分类映射
+    var CATEGORY_MAP = {
+        'chat': 'rankingChat',
+        'image': 'rankingImage',
+        'video': 'rankingVideo',
+        'design': 'rankingDesign'
+    };
+
+    // 内置AI工具数据（备用，当Supabase不可用时使用）
+    var FALLBACK_TOOLS = {
+        'chat': [
+            { name: 'ChatGPT', domain: 'chatgpt.com' },
+            { name: 'Claude', domain: 'claude.ai' },
+            { name: 'Perplexity', domain: 'perplexity.ai' },
+            { name: 'DeepSeek', domain: 'deepseek.com' },
+            { name: 'Character.AI', domain: 'character.ai' },
+            { name: 'Poe', domain: 'poe.com' }
+        ],
+        'image': [
+            { name: 'Midjourney', domain: 'midjourney.com' },
+            { name: 'Leonardo.AI', domain: 'leonardo.ai' },
+            { name: 'Ideogram', domain: 'ideogram.ai' },
+            { name: '海艺SeaArt', domain: 'seaart.ai' },
+            { name: 'Civitai', domain: 'civitai.com' },
+            { name: 'Freepik', domain: 'freepik.com' }
+        ],
+        'video': [
+            { name: 'Runway', domain: 'runwayml.com' },
+            { name: 'Pika', domain: 'pika.art' },
+            { name: 'HeyGen', domain: 'heygen.com' },
+            { name: 'Synthesia', domain: 'synthesia.io' },
+            { name: '可灵KLING', domain: 'klingai.com' },
+            { name: 'CapCut', domain: 'capcut.com' }
+        ],
+        'design': [
+            { name: 'Canva', domain: 'canva.com' },
+            { name: 'Figma', domain: 'figma.com' },
+            { name: 'Notion', domain: 'notion.so' },
+            { name: 'Framer', domain: 'framer.com' },
+            { name: 'Remove.bg', domain: 'remove.bg' },
+            { name: 'Gamma', domain: 'gamma.app' }
+        ]
+    };
+
+    // 缓存（避免重复请求）
+    var rankingCache = {};
+    var CACHE_KEY = 'ai_ranking_cache';
+    var CACHE_DURATION = 6 * 60 * 60 * 1000; // 6小时缓存
+
+    // 从localStorage加载缓存
+    function loadCache() {
+        try {
+            var cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                var data = JSON.parse(cached);
+                if (data.timestamp && (Date.now() - data.timestamp < CACHE_DURATION)) {
+                    rankingCache = data.rankings || {};
+                    return true;
+                }
+            }
+        } catch (e) {}
+        return false;
+    }
+
+    // 保存缓存到localStorage
+    function saveCache() {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+                timestamp: Date.now(),
+                rankings: rankingCache
+            }));
+        } catch (e) {}
+    }
+
+    // 获取单个域名的排名
+    function fetchRanking(domain) {
+        return new Promise(function(resolve) {
+            // 检查缓存
+            if (rankingCache[domain] !== undefined) {
+                resolve(rankingCache[domain]);
+                return;
+            }
+
+            fetch(TRANCO_API + domain)
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    var rank = null;
+                    if (data.ranks && data.ranks.length > 0) {
+                        rank = data.ranks[0].rank;
+                    }
+                    rankingCache[domain] = rank;
+                    resolve(rank);
+                })
+                .catch(function() {
+                    rankingCache[domain] = null;
+                    resolve(null);
+                });
+        });
+    }
+
+    // 延迟函数
+    function delay(ms) {
+        return new Promise(function(resolve) {
+            setTimeout(resolve, ms);
+        });
+    }
+
+    // 渲染单个榜单
+    function renderRankingList(containerId, tools) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+
+        // 过滤掉没有排名的工具，并按排名排序
+        var validTools = tools.filter(function(t) { return t.rank !== null; });
+        validTools.sort(function(a, b) { return a.rank - b.rank; });
+
+        // 只显示前5个
+        var topTools = validTools.slice(0, RANKING_DISPLAY_COUNT);
+
+        if (topTools.length === 0) {
+            container.innerHTML = '<div class="ranking-error"><i class="ri-signal-wifi-off-line"></i>暂无数据</div>';
+            return;
+        }
+
+        var html = '';
+        for (var i = 0; i < topTools.length; i++) {
+            var tool = topTools[i];
+            var rankClass = i === 0 ? 'top-1' : (i === 1 ? 'top-2' : (i === 2 ? 'top-3' : 'top-other'));
+
+            html += '<div class="ranking-item" onclick="window.open(\'https://' + tool.domain + '\', \'_blank\')">';
+            html += '  <div class="ranking-rank ' + rankClass + '">' + (i + 1) + '</div>';
+            html += '  <div class="ranking-info">';
+            html += '    <div class="ranking-name">' + tool.name + '</div>';
+            html += '    <div class="ranking-domain">' + tool.domain + '</div>';
+            html += '  </div>';
+            html += '  <div class="ranking-score">#' + tool.rank.toLocaleString() + '</div>';
+            html += '</div>';
+        }
+
+        container.innerHTML = html;
+    }
+
+    // 加载并渲染所有榜单
+    async function loadRankings() {
+        // 先尝试从缓存加载
+        var hasCache = loadCache();
+
+        // 尝试从Supabase获取工具列表
+        var toolsByCategory = {};
+        var useSupabase = false;
+
+        if (window.db) {
+            try {
+                var result = await window.db.from('ai_tools').select('*').eq('is_active', true);
+                if (result.data && result.data.length > 0) {
+                    useSupabase = true;
+                    // 按分类分组
+                    result.data.forEach(function(tool) {
+                        if (!toolsByCategory[tool.category]) {
+                            toolsByCategory[tool.category] = [];
+                        }
+                        toolsByCategory[tool.category].push({
+                            name: tool.name,
+                            domain: tool.domain,
+                            rank: null
+                        });
+                    });
+                }
+            } catch (e) {
+                console.log('[Ranking] Supabase not available, using fallback data');
+            }
+        }
+
+        // 如果Supabase不可用，使用备用数据
+        if (!useSupabase) {
+            Object.keys(FALLBACK_TOOLS).forEach(function(cat) {
+                toolsByCategory[cat] = FALLBACK_TOOLS[cat].map(function(t) {
+                    return { name: t.name, domain: t.domain, rank: null };
+                });
+            });
+        }
+
+        // 如果有缓存，先用缓存数据渲染
+        if (hasCache) {
+            Object.keys(toolsByCategory).forEach(function(cat) {
+                toolsByCategory[cat].forEach(function(tool) {
+                    tool.rank = rankingCache[tool.domain] || null;
+                });
+                var containerId = CATEGORY_MAP[cat];
+                if (containerId) {
+                    renderRankingList(containerId, toolsByCategory[cat]);
+                }
+            });
+        }
+
+        // 收集所有需要获取排名的域名
+        var allDomains = [];
+        Object.keys(toolsByCategory).forEach(function(cat) {
+            toolsByCategory[cat].forEach(function(tool) {
+                if (rankingCache[tool.domain] === undefined) {
+                    allDomains.push({ category: cat, tool: tool });
+                }
+            });
+        });
+
+        // 如果有新域名需要获取，逐个获取（避免rate limit）
+        if (allDomains.length > 0) {
+            for (var i = 0; i < allDomains.length; i++) {
+                var item = allDomains[i];
+                var rank = await fetchRanking(item.tool.domain);
+                item.tool.rank = rank;
+
+                // 每次获取后更新对应榜单
+                var containerId = CATEGORY_MAP[item.category];
+                if (containerId) {
+                    renderRankingList(containerId, toolsByCategory[item.category]);
+                }
+
+                // 延迟，避免rate limit
+                if (i < allDomains.length - 1) {
+                    await delay(API_DELAY);
+                }
+            }
+
+            // 保存缓存
+            saveCache();
+        }
+    }
+
+    // 初始化
+    loadRankings();
+})();
+
