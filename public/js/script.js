@@ -1315,128 +1315,6 @@ var DataService = (function() {
     });
 })();
 
-// 访客数据逻辑：从 51.la 隐藏挂件中抓取数据并填入自定义样式
-(function () {
-    var isDataLoaded = false;
-    var retryCount = 0;
-    var maxRetries = 30; // 最多尝试30秒
-    var containerWarned = false; // 只警告一次
-
-    function syncData() {
-        var container = document.getElementById("la_data_container");
-
-        if (!container) {
-            return;
-        }
-
-        // 获取所有文本内容，包括 iframe 和子元素
-        var text = "";
-        try {
-            // 尝试从所有可能的文本源获取数据
-            text = container.textContent || container.innerText || "";
-
-            // 也尝试从 iframe 中获取 (如果 51.la 使用 iframe)
-            var iframe = container.querySelector("iframe");
-            if (iframe && iframe.contentWindow) {
-                try {
-                    var iframeText = iframe.contentWindow.document.body.textContent || "";
-                    text += " " + iframeText;
-                } catch(e) {
-                    // 跨域限制，忽略
-                }
-            }
-        } catch(e) {
-            // Error reading container, ignore
-        }
-
-        // 简单清洗
-        text = text.replace(/\s+/g, " ").trim();
-
-        if (!text || text.length < 5) {
-            retryCount++;
-            return;
-        }
-
-        isDataLoaded = true;
-
-        // 尝试通过标签匹配 (正则更加宽容)
-        // 匹配模式： "标签" 后面跟着 "数字"
-
-        // 1. 在线 (Online)
-        var onlineMatch = text.match(/(?:活跃|在线|Online|当前)[^0-9]*(\d+)/i);
-
-        // 2. 今日 (Today) - 优先取 PV (访问量)，如果没有取 UV (访客)
-        var todayMatch = text.match(/(?:今日|Today|今天)[^0-9]*(?:PV|访问)?[^0-9]*(\d+)/i);
-
-        // 3. 累计 (Total) - 优先取 PV (总访问量)
-        var totalMatch = text.match(/(?:总计|累计|Total|总)[^0-9]*(?:PV|访问)?[^0-9]*(\d+)/i);
-
-        // 纯数字提取 (作为最后的兜底)
-        // 51.la 默认顺序 (全开时): TotalPV, TotalUV, TotalIP, TodayPV, TodayUV, TodayIP, Yest, Online
-        var nums = text.match(/\d+/g);
-
-        var onlineVal = "--";
-        var todayVal = "--";
-        var totalVal = "--";
-
-        // 策略 A: 正则匹配成功
-        if (onlineMatch) onlineVal = onlineMatch[1];
-        if (todayMatch) todayVal = todayMatch[1];
-        if (totalMatch) totalVal = totalMatch[1];
-
-        // 策略 B: 正则失败，使用位置兜底 (假设 display=1,1,1,1,1,1,0,1)
-        if (nums && nums.length >= 8) {
-            // 根据 display=1,1,1,1,1,1,0,1 参数
-            // nums[0]=TotalPV, nums[3]=TodayPV, nums[7]=Online
-            if (totalVal === "--") totalVal = nums[0];
-            if (todayVal === "--") todayVal = nums[3];
-            if (onlineVal === "--") onlineVal = nums[7];
-        } else if (nums && nums.length >= 4) {
-            // 降级方案：假设至少有 4 个数字
-            if (totalVal === "--") totalVal = nums[0];
-            if (todayVal === "--") todayVal = nums[nums.length > 4 ? 3 : 1];
-            if (onlineVal === "--") onlineVal = nums[nums.length - 1];
-        }
-
-        // 逻辑校验与格式化
-        var tDay = parseInt(todayVal, 10);
-        var tTot = parseInt(totalVal, 10);
-        var tOnline = parseInt(onlineVal, 10);
-
-        // 数据验证
-        if (!isNaN(tDay) && !isNaN(tTot)) {
-            // 如果累计小于今日 (逻辑错误)，强制修正
-            if (tTot < tDay) {
-                tTot = tDay;
-                totalVal = tTot.toString();
-            }
-        }
-
-        // 异常大数过滤 (防止抓到 ID 或时间戳)
-        if (parseInt(totalVal) > 1000000000) totalVal = "--";
-        if (parseInt(todayVal) > 1000000) todayVal = "--";
-        if (parseInt(onlineVal) > 10000) onlineVal = "--";
-
-        // 在线人数至少为 1 (有当前用户)
-        if (onlineVal === "--" || parseInt(onlineVal) < 1) {
-            onlineVal = "1";
-        }
-
-        var elTotal = document.getElementById("custom_total");
-        var elToday = document.getElementById("custom_today");
-        var elOnline = document.getElementById("custom_online");
-
-        if (elTotal) elTotal.textContent = totalVal;
-        if (elToday) elToday.textContent = todayVal;
-        if (elOnline) elOnline.textContent = onlineVal;
-    }
-
-    // 延迟启动，等待 widget 加载
-    setTimeout(function() {
-        syncData(); // 立即执行一次
-        setInterval(syncData, 2000); // 之后每2秒更新一次
-    }, 3000); // 等待3秒后开始
-})();
 
 // 轮播图逻辑 (聚合多源新闻)
 (function() {
@@ -1675,6 +1553,13 @@ var DataService = (function() {
         slide.appendChild(content);
         
         slide.onclick = function() {
+           // Banner点击埋点
+           if (typeof trackEvent === 'function') {
+               trackEvent('banner_click', {
+                   banner_title: item.title || '',
+                   banner_source: item.source || ''
+               });
+           }
            if (item.link) window.open(item.link, "_blank");
         };
         
@@ -2102,18 +1987,7 @@ function trackEvent(eventName, params) {
 // 已在 renderEngines() 函数的搜索引擎切换事件中实现
 
 // 5. Banner点击埋点 (banner_click)
-(function() {
-    // 需要找到Banner元素添加点击监听
-    // 根据实际Banner元素调整选择器
-    var banner = document.querySelector('.banner, .hero, [class*="banner"]');
-    if (banner) {
-        banner.addEventListener('click', function() {
-            trackEvent('banner_click', {
-                banner_position: 'top'
-            });
-        });
-    }
-})();
+// 已在轮播图逻辑的 slide.onclick 中实现
 
 // 6. 反馈按钮点击埋点 (feedback_button_click)
 (function() {

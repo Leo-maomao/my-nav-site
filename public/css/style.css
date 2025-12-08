@@ -969,46 +969,6 @@ a {
 }
 
 
-/* 51.la 挂件样式深度定制 */
-#la_data_container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-    min-height: 100px; /* 给它一个最小高度，确保有地方渲染 */
-}
-
-/* 尝试对 51.la 默认生成的结构进行样式覆盖 */
-/* 51.la v6 挂件通常生成 span 或 div 列表 */
-#la_data_container .la-quote-item, 
-#la_data_container span {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    width: 100% !important;
-    font-size: 12px !important;
-    color: #6b7280 !important;
-    margin: 0 !important;
-    padding: 4px 0 !important;
-    border-bottom: 1px dashed #f1f5f9;
-}
-
-#la_data_container .la-quote-item:last-child,
-#la_data_container span:last-child {
-    border-bottom: none;
-}
-
-/* 数字加粗 */
-#la_data_container .la-quote-item b,
-#la_data_container span b,
-#la_data_container span strong, 
-#la_data_container span i {
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    color: #111827 !important;
-    font-family: 'SF Mono', 'Menlo', monospace !important;
-    font-style: normal !important;
-}
 
 /* 翻页动画关键帧 */
 @keyframes flipTop {
