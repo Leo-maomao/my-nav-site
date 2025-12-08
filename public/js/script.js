@@ -2120,6 +2120,21 @@ function trackEvent(eventName, params) {
         });
     }
 
+    // 获取Logo URL（使用Google Favicon服务）
+    function getLogoUrl(domain) {
+        return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=64';
+    }
+
+    // 格式化全球排名显示
+    function formatGlobalRank(rank) {
+        if (rank >= 1000000) {
+            return (rank / 1000000).toFixed(1) + 'M';
+        } else if (rank >= 1000) {
+            return (rank / 1000).toFixed(1) + 'K';
+        }
+        return rank.toString();
+    }
+
     // 渲染单个榜单
     function renderRankingList(containerId, tools) {
         var container = document.getElementById(containerId);
@@ -2141,14 +2156,22 @@ function trackEvent(eventName, params) {
         for (var i = 0; i < topTools.length; i++) {
             var tool = topTools[i];
             var rankClass = i === 0 ? 'top-1' : (i === 1 ? 'top-2' : (i === 2 ? 'top-3' : 'top-other'));
+            var logoUrl = getLogoUrl(tool.domain);
+            var fallbackChar = tool.name.charAt(0).toUpperCase();
 
             html += '<div class="ranking-item" onclick="window.open(\'https://' + tool.domain + '\', \'_blank\')">';
             html += '  <div class="ranking-rank ' + rankClass + '">' + (i + 1) + '</div>';
+            html += '  <div class="ranking-logo">';
+            html += '    <img src="' + logoUrl + '" alt="' + tool.name + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">';
+            html += '    <span class="ranking-logo-fallback" style="display:none;">' + fallbackChar + '</span>';
+            html += '  </div>';
             html += '  <div class="ranking-info">';
             html += '    <div class="ranking-name">' + tool.name + '</div>';
-            html += '    <div class="ranking-domain">' + tool.domain + '</div>';
+            html += '    <div class="ranking-meta">';
+            html += '      <span class="ranking-global-rank"><i class="ri-global-line"></i> 全球 #' + formatGlobalRank(tool.rank) + '</span>';
+            html += '    </div>';
             html += '  </div>';
-            html += '  <div class="ranking-score">#' + tool.rank.toLocaleString() + '</div>';
+            html += '  <div class="ranking-visit-btn"><i class="ri-external-link-line"></i> 前往</div>';
             html += '</div>';
         }
 

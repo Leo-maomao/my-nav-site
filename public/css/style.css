@@ -1688,18 +1688,9 @@ body.is-config-mode .tool-card-add {
   margin-bottom: 16px;
 }
 
-.ranking-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-}
-
-.ranking-title i {
+.ranking-header .tool-section-header i {
   color: #2563eb;
+  font-size: 14px;
 }
 
 .ranking-source {
@@ -1730,12 +1721,6 @@ body.is-config-mode .tool-card-add {
   border: 1px solid rgba(229, 231, 235, 0.9);
   border-radius: 16px;
   overflow: hidden;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.ranking-card:hover {
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-  transform: translateY(-2px);
 }
 
 .ranking-card-header {
@@ -1782,24 +1767,30 @@ body.is-config-mode .tool-card-add {
 .ranking-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
+  gap: 10px;
+  padding: 10px 14px;
   cursor: pointer;
   transition: background 0.15s ease;
+  position: relative;
 }
 
 .ranking-item:hover {
-  background: #f8fafc;
+  background: linear-gradient(to right, #f8fafc, #f1f5f9);
+}
+
+.ranking-item:hover .ranking-visit-btn {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .ranking-rank {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -1807,6 +1798,7 @@ body.is-config-mode .tool-card-add {
 .ranking-rank.top-1 {
   background: linear-gradient(135deg, #fbbf24, #f59e0b);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.35);
 }
 
 .ranking-rank.top-2 {
@@ -1824,13 +1816,40 @@ body.is-config-mode .tool-card-add {
   color: #64748b;
 }
 
+/* 产品Logo */
+.ranking-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: #f8fafc;
+  border: 1px solid rgba(229, 231, 235, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ranking-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ranking-logo-fallback {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
 .ranking-info {
   flex: 1;
   min-width: 0;
 }
 
 .ranking-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #1e293b;
   white-space: nowrap;
@@ -1838,22 +1857,49 @@ body.is-config-mode .tool-card-add {
   text-overflow: ellipsis;
 }
 
-.ranking-domain {
-  font-size: 11px;
-  color: #94a3b8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.ranking-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
 }
 
-.ranking-score {
-  font-size: 12px;
-  color: #64748b;
-  font-family: 'SF Mono', 'Menlo', monospace;
-  background: #f1f5f9;
-  padding: 4px 8px;
+.ranking-global-rank {
+  font-size: 11px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ranking-global-rank i {
+  font-size: 10px;
+}
+
+/* 前往按钮 */
+.ranking-visit-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
   border-radius: 6px;
+  opacity: 0;
+  transform: translateX(8px);
+  transition: all 0.2s ease;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.ranking-visit-btn:hover {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+}
+
+.ranking-visit-btn i {
+  font-size: 12px;
 }
 
 .ranking-error {
