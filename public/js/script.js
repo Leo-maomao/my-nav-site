@@ -2011,7 +2011,8 @@ function trackEvent(eventName, params) {
     // 配置
     var TRANCO_API = 'https://tranco-list.eu/api/ranks/domain/';
     var RANKING_DISPLAY_COUNT = 5; // 每个榜单显示5个
-    var API_DELAY = 1200; // API调用间隔（毫秒），避免rate limit
+    var API_DELAY = 300; // API调用间隔（毫秒），避免rate limit（优化：从1200ms降至300ms）
+    var BATCH_SIZE = 3; // 并行请求批次大小
 
     // 分类映射
     var CATEGORY_MAP = {
@@ -2068,7 +2069,7 @@ function trackEvent(eventName, params) {
     // 缓存（避免重复请求）
     var rankingCache = {};
     var CACHE_KEY = 'ai_ranking_cache';
-    var CACHE_DURATION = 6 * 60 * 60 * 1000; // 6小时缓存
+    var CACHE_DURATION = 24 * 60 * 60 * 1000; // 24小时缓存（优化：从6小时延长至24小时）
 
     // 从localStorage加载缓存
     function loadCache() {
@@ -2277,15 +2278,21 @@ function trackEvent(eventName, params) {
             });
         });
 
-        // 如果有新域名需要获取，逐个获取（避免rate limit）
+        // 如果有新域名需要获取，分批并行获取（优化：从串行改为批量并行）
         if (allDomains.length > 0) {
-            for (var i = 0; i < allDomains.length; i++) {
-                var item = allDomains[i];
-                var rank = await fetchRanking(item.tool.domain);
-                item.tool.rank = rank;
+            // 按批次分组
+            for (var i = 0; i < allDomains.length; i += BATCH_SIZE) {
+                var batch = allDomains.slice(i, i + BATCH_SIZE);
 
-                // 延迟，避免rate limit
-                if (i < allDomains.length - 1) {
+                // 并行获取当前批次
+                await Promise.all(batch.map(function(item) {
+                    return fetchRanking(item.tool.domain).then(function(rank) {
+                        item.tool.rank = rank;
+                    });
+                }));
+
+                // 批次间延迟，避免rate limit
+                if (i + BATCH_SIZE < allDomains.length) {
                     await delay(API_DELAY);
                 }
             }
