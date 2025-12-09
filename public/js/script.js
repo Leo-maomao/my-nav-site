@@ -59,7 +59,6 @@ var DataService = (function() {
             if (error) throw error;
             alert("反馈已提交成功！");
         } catch (e) {
-            console.error("Submit Error:", e);
             alert("提交失败，请重试: " + e.message);
         }
     }
@@ -78,7 +77,6 @@ var DataService = (function() {
             if (error) throw error;
             return data || [];
         } catch (e) {
-            console.error("Get Feedback Error:", e);
             return [];
         }
     }
@@ -554,7 +552,7 @@ var DataService = (function() {
     function loadRecent() {
         var saved = localStorage.getItem(RECENT_KEY);
         if (saved) {
-            try { return JSON.parse(saved); } catch (e) { console.error("Failed to parse recent tools", e); }
+            try { return JSON.parse(saved); } catch (e) { /* parse error */ }
         }
         return [];
     }
@@ -1449,7 +1447,6 @@ var DataService = (function() {
             }
         })
         .catch(function(e) {
-            console.error("Fetch News Failed:", e);
             useFallback();
         });
 
@@ -1886,8 +1883,6 @@ try {
             if (loginModal) {
                 loginModal.classList.add('is-visible');
                 setTimeout(function() { if(emailInput) emailInput.focus(); }, 50);
-            } else {
-                console.error("Login modal not found!");
             }
         }
     }
@@ -2257,7 +2252,7 @@ function trackEvent(eventName, params) {
                     });
                 }
             } catch (e) {
-                console.log('[Ranking] Supabase not available, using fallback data');
+                // Supabase not available, using fallback data
             }
         }
 
