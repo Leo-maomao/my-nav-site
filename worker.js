@@ -1,6 +1,6 @@
 // Cloudflare Worker - 处理 API 请求
-const SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1NjY1NTAsImV4cCI6MjA0OTE0MjU1MH0.QE4Yb0ncB3GK8wnAAF1YaSPKKpJJKdQv2hM9BNc8F4U";
+const SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleGNudWJvd3NhcnB4a29ocXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMjYyOTksImV4cCI6MjA3OTgwMjI5OX0.TCGkoBou99fui-cgcpod-b3BaSdq1mg7SFUtR2mIxms";
 const TRANCO_API = 'https://tranco-list.eu/api/ranks/domain/';
 
 // AI 工具候选列表（每个分类尽量多，最终取排名前5）
