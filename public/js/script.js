@@ -2003,8 +2003,8 @@ function trackEvent(eventName, params) {
 // AI工具榜单模块 (Tranco API)
 // ========================================
 (function() {
-    // 配置
-    var TRANCO_API = 'https://tranco-list.eu/api/ranks/domain/';
+    // 配置（使用本站代理避免 CORS 问题）
+    var TRANCO_API = '/api/tranco/';
     var RANKING_DISPLAY_COUNT = 5; // 每个榜单显示5个
     var API_DELAY = 300; // API调用间隔（毫秒），避免rate limit（优化：从1200ms降至300ms）
     var BATCH_SIZE = 3; // 并行请求批次大小
