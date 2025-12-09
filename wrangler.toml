@@ -5,3 +5,7 @@ main = "worker.js"
 [assets]
 directory = "./public"
 
+# 每天 UTC 0:00 (北京时间 8:00) 自动更新排名
+[triggers]
+crons = ["0 0 * * *"]
+

@@ -156,5 +156,10 @@ export default {
     }
 
     return env.ASSETS.fetch(request);
+  },
+
+  // 定时触发器 - 每天自动更新排名
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(updateRankings());
   }
 };
