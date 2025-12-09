@@ -86,29 +86,37 @@ async function fetchTrancoRank(domain) {
   }
 }
 
-const delay = ms => new Promise(r => setTimeout(r, ms));
-
 async function updateRankings() {
   const startTime = Date.now();
   const results = [];
   const errors = [];
 
+  // 并行获取所有工具的排名（每批5个，避免429）
   for (const [category, tools] of Object.entries(TOOLS_CONFIG)) {
-    for (const tool of tools) {
-      const rank = await fetchTrancoRank(tool.domain);
-      if (rank !== null) {
-        results.push({
-          name: tool.name,
-          domain: tool.domain,
-          category,
-          tranco_rank: rank,
-          is_active: true,
-          updated_at: new Date().toISOString()
-        });
-      } else {
-        errors.push(`${tool.name}: 获取失败`);
+    const batchSize = 5;
+    for (let i = 0; i < tools.length; i += batchSize) {
+      const batch = tools.slice(i, i + batchSize);
+      const batchResults = await Promise.all(
+        batch.map(async (tool) => {
+          const rank = await fetchTrancoRank(tool.domain);
+          return { tool, rank };
+        })
+      );
+
+      for (const { tool, rank } of batchResults) {
+        if (rank !== null) {
+          results.push({
+            name: tool.name,
+            domain: tool.domain,
+            category,
+            tranco_rank: rank,
+            is_active: true,
+            updated_at: new Date().toISOString()
+          });
+        } else {
+          errors.push(`${tool.name}: 获取失败`);
+        }
       }
-      await delay(500);
     }
   }
 
@@ -130,7 +138,7 @@ async function updateRankings() {
   return {
     success: dbSuccess,
     message: dbSuccess ? '更新成功' : '数据库更新失败',
-    stats: { total: 32, success: results.length, failed: errors.length, duration: `${((Date.now() - startTime) / 1000).toFixed(1)}s` },
+    stats: { total: 60, success: results.length, failed: errors.length, duration: `${((Date.now() - startTime) / 1000).toFixed(1)}s` },
     errors: errors.length > 0 ? errors : undefined
   };
 }
