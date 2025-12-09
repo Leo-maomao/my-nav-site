@@ -3,6 +3,7 @@ const SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1NjY1NTAsImV4cCI6MjA0OTE0MjU1MH0.QE4Yb0ncB3GK8wnAAF1YaSPKKpJJKdQv2hM9BNc8F4U";
 const TRANCO_API = 'https://tranco-list.eu/api/ranks/domain/';
 
+// AI 工具候选列表（每个分类尽量多，最终取排名前5）
 const TOOLS_CONFIG = {
   '聊天对话': [
     { name: 'ChatGPT', domain: 'chatgpt.com' },
@@ -11,8 +12,15 @@ const TOOLS_CONFIG = {
     { name: 'DeepSeek', domain: 'deepseek.com' },
     { name: 'Character.AI', domain: 'character.ai' },
     { name: 'Poe', domain: 'poe.com' },
-    { name: 'Gemini', domain: 'gemini.google.com' },
-    { name: '通义千问', domain: 'tongyi.aliyun.com' }
+    { name: 'You.com', domain: 'you.com' },
+    { name: 'Kimi', domain: 'kimi.moonshot.cn' },
+    { name: '豆包', domain: 'doubao.com' },
+    { name: 'Pi', domain: 'pi.ai' },
+    { name: 'Jasper Chat', domain: 'jasper.ai' },
+    { name: 'HuggingChat', domain: 'huggingface.co' },
+    { name: 'Cohere', domain: 'cohere.com' },
+    { name: 'Replika', domain: 'replika.ai' },
+    { name: 'Chai', domain: 'chai-research.com' }
   ],
   '图片生成': [
     { name: 'Midjourney', domain: 'midjourney.com' },
@@ -21,8 +29,15 @@ const TOOLS_CONFIG = {
     { name: '海艺SeaArt', domain: 'seaart.ai' },
     { name: 'Civitai', domain: 'civitai.com' },
     { name: 'Freepik', domain: 'freepik.com' },
-    { name: 'Adobe Firefly', domain: 'firefly.adobe.com' },
-    { name: 'Stable Diffusion', domain: 'stability.ai' }
+    { name: 'Stability AI', domain: 'stability.ai' },
+    { name: 'NightCafe', domain: 'nightcafe.studio' },
+    { name: 'Playground', domain: 'playground.com' },
+    { name: 'Lexica', domain: 'lexica.art' },
+    { name: 'DreamStudio', domain: 'dreamstudio.ai' },
+    { name: 'Craiyon', domain: 'craiyon.com' },
+    { name: 'Pixlr', domain: 'pixlr.com' },
+    { name: 'Fotor', domain: 'fotor.com' },
+    { name: 'Hotpot', domain: 'hotpot.ai' }
   ],
   '视频生成': [
     { name: 'Runway', domain: 'runwayml.com' },
@@ -32,7 +47,14 @@ const TOOLS_CONFIG = {
     { name: '可灵KLING', domain: 'klingai.com' },
     { name: 'CapCut', domain: 'capcut.com' },
     { name: 'Luma AI', domain: 'lumalabs.ai' },
-    { name: 'Descript', domain: 'descript.com' }
+    { name: 'Descript', domain: 'descript.com' },
+    { name: 'InVideo', domain: 'invideo.io' },
+    { name: 'Pictory', domain: 'pictory.ai' },
+    { name: 'Fliki', domain: 'fliki.ai' },
+    { name: 'Colossyan', domain: 'colossyan.com' },
+    { name: 'D-ID', domain: 'd-id.com' },
+    { name: 'Elai', domain: 'elai.io' },
+    { name: 'Veed', domain: 'veed.io' }
   ],
   '设计创作': [
     { name: 'Canva', domain: 'canva.com' },
@@ -42,7 +64,14 @@ const TOOLS_CONFIG = {
     { name: 'Remove.bg', domain: 'remove.bg' },
     { name: 'Gamma', domain: 'gamma.app' },
     { name: 'Beautiful.ai', domain: 'beautiful.ai' },
-    { name: 'Miro', domain: 'miro.com' }
+    { name: 'Miro', domain: 'miro.com' },
+    { name: 'Whimsical', domain: 'whimsical.com' },
+    { name: 'Pitch', domain: 'pitch.com' },
+    { name: 'Simplified', domain: 'simplified.com' },
+    { name: 'Designify', domain: 'designify.com' },
+    { name: 'Looka', domain: 'looka.com' },
+    { name: 'Uizard', domain: 'uizard.io' },
+    { name: 'Khroma', domain: 'khroma.co' }
   ]
 };
 
