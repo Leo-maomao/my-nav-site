@@ -1,4 +1,4 @@
-// Cloudflare Worker - 处理 API 请求和静态资源
+// Cloudflare Pages Function - 更新排名数据
 const SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1NjY1NTAsImV4cCI6MjA0OTE0MjU1MH0.QE4Yb0ncB3GK8wnAAF1YaSPKKpJJKdQv2hM9BNc8F4U";
 const TRANCO_API = 'https://tranco-list.eu/api/ranks/domain/';
@@ -47,7 +47,6 @@ const TOOLS_CONFIG = {
   ]
 };
 
-// 获取单个域名的 Tranco 排名
 async function fetchTrancoRank(domain) {
   try {
     const response = await fetch(TRANCO_API + domain);
@@ -62,13 +61,12 @@ async function fetchTrancoRank(domain) {
   }
 }
 
-// 延迟函数
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// 更新排名数据到 Supabase
-async function updateRankings() {
+// Pages Function 入口
+export async function onRequest(context) {
   const startTime = Date.now();
   const results = [];
   const errors = [];
@@ -88,11 +86,10 @@ async function updateRankings() {
       } else {
         errors.push(`${tool.name} (${tool.domain}): 获取排名失败`);
       }
-      await delay(500); // 避免请求过快
+      await delay(500);
     }
   }
 
-  // 批量更新到 Supabase
   let dbSuccess = false;
   if (results.length > 0) {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools`, {
@@ -110,7 +107,7 @@ async function updateRankings() {
 
   const duration = ((Date.now() - startTime) / 1000).toFixed(1);
 
-  return {
+  return new Response(JSON.stringify({
     success: dbSuccess,
     message: dbSuccess ? '排名数据更新成功' : '数据库更新失败',
     stats: {
@@ -121,25 +118,10 @@ async function updateRankings() {
     },
     errors: errors.length > 0 ? errors : undefined,
     updated_at: new Date().toISOString()
-  };
-}
-
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-
-    // 处理更新排名 API
-    if (url.pathname === '/api/update-rankings') {
-      const result = await updateRankings();
-      return new Response(JSON.stringify(result, null, 2), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        }
-      });
+  }, null, 2), {
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
     }
-
-    // 其他请求返回静态资源
-    return env.ASSETS.fetch(request);
-  }
-};
+  });
+}
