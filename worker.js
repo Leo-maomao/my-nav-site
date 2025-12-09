@@ -123,7 +123,7 @@ async function updateRankings() {
   let dbSuccess = false;
   let dbError = null;
   if (results.length > 0) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools?on_conflict=domain`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -175,7 +175,7 @@ async function quickTest() {
   let dbSuccess = false;
   let dbError = null;
   if (results.length > 0) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools?on_conflict=domain`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
