@@ -2284,17 +2284,19 @@ function trackEvent(eventName, params) {
                 var rank = await fetchRanking(item.tool.domain);
                 item.tool.rank = rank;
 
-                // 每次获取后更新对应榜单
-                var containerId = CATEGORY_MAP[item.category];
-                if (containerId) {
-                    renderRankingList(containerId, toolsByCategory[item.category], item.category);
-                }
-
                 // 延迟，避免rate limit
                 if (i < allDomains.length - 1) {
                     await delay(API_DELAY);
                 }
             }
+
+            // 所有数据获取完毕后，统一渲染所有榜单
+            Object.keys(toolsByCategory).forEach(function(cat) {
+                var containerId = CATEGORY_MAP[cat];
+                if (containerId) {
+                    renderRankingList(containerId, toolsByCategory[cat], cat);
+                }
+            });
 
             // 保存缓存
             saveCache();
