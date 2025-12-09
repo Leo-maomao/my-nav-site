@@ -2000,14 +2000,11 @@ function trackEvent(eventName, params) {
 // 已在反馈提交按钮的 onclick 事件中实现
 
 // ========================================
-// AI工具榜单模块 (Tranco API)
+// AI工具榜单模块（从 Supabase 读取预存排名）
 // ========================================
 (function() {
-    // 配置（使用本站代理避免 CORS 问题）
-    var TRANCO_API = '/api/tranco/';
+    // 配置
     var RANKING_DISPLAY_COUNT = 5; // 每个榜单显示5个
-    var API_DELAY = 300; // API调用间隔（毫秒），避免rate limit（优化：从1200ms降至300ms）
-    var BATCH_SIZE = 3; // 并行请求批次大小
 
     // 分类映射
     var CATEGORY_MAP = {
@@ -2060,69 +2057,6 @@ function trackEvent(eventName, params) {
             { name: 'Gamma', domain: 'gamma.app' }
         ]
     };
-
-    // 缓存（避免重复请求）
-    var rankingCache = {};
-    var CACHE_KEY = 'ai_ranking_cache';
-    var CACHE_DURATION = 24 * 60 * 60 * 1000; // 24小时缓存（优化：从6小时延长至24小时）
-
-    // 从localStorage加载缓存
-    function loadCache() {
-        try {
-            var cached = localStorage.getItem(CACHE_KEY);
-            if (cached) {
-                var data = JSON.parse(cached);
-                if (data.timestamp && (Date.now() - data.timestamp < CACHE_DURATION)) {
-                    rankingCache = data.rankings || {};
-                    return true;
-                }
-            }
-        } catch (e) {}
-        return false;
-    }
-
-    // 保存缓存到localStorage
-    function saveCache() {
-        try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify({
-                timestamp: Date.now(),
-                rankings: rankingCache
-            }));
-        } catch (e) {}
-    }
-
-    // 获取单个域名的排名
-    function fetchRanking(domain) {
-        return new Promise(function(resolve) {
-            // 检查缓存
-            if (rankingCache[domain] !== undefined) {
-                resolve(rankingCache[domain]);
-                return;
-            }
-
-            fetch(TRANCO_API + domain)
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    var rank = null;
-                    if (data.ranks && data.ranks.length > 0) {
-                        rank = data.ranks[0].rank;
-                    }
-                    rankingCache[domain] = rank;
-                    resolve(rank);
-                })
-                .catch(function() {
-                    rankingCache[domain] = null;
-                    resolve(null);
-                });
-        });
-    }
-
-    // 延迟函数
-    function delay(ms) {
-        return new Promise(function(resolve) {
-            setTimeout(resolve, ms);
-        });
-    }
 
     // 自定义Logo覆盖（Google Favicon获取不准确的情况）
     var CUSTOM_LOGOS = {
@@ -2215,72 +2149,66 @@ function trackEvent(eventName, params) {
         };
     }
 
-    // 加载并渲染所有榜单
+    // 加载并渲染所有榜单（从 Supabase 读取预存的排名数据）
     async function loadRankings() {
-        // 先尝试从缓存加载
-        var hasCache = loadCache();
-
-        // 直接使用内置工具列表（排名数据从 Tranco API 实时获取）
         var toolsByCategory = {};
+
+        // 分类名称映射
+        var categoryMapping = {
+            '聊天对话': 'chat',
+            '图片生成': 'image',
+            '视频生成': 'video',
+            '设计创作': 'design'
+        };
+
+        // 尝试从 Supabase 获取数据
+        if (window.db) {
+            try {
+                var result = await window.db
+                    .from('ai_tools')
+                    .select('*')
+                    .eq('is_active', true)
+                    .not('tranco_rank', 'is', null)
+                    .order('tranco_rank', { ascending: true });
+
+                if (result.data && result.data.length > 0) {
+                    // 按分类分组
+                    result.data.forEach(function(tool) {
+                        var cat = categoryMapping[tool.category] || tool.category;
+                        if (!toolsByCategory[cat]) {
+                            toolsByCategory[cat] = [];
+                        }
+                        toolsByCategory[cat].push({
+                            name: tool.name,
+                            domain: tool.domain,
+                            rank: tool.tranco_rank
+                        });
+                    });
+
+                    // 渲染各分类榜单
+                    Object.keys(toolsByCategory).forEach(function(cat) {
+                        var containerId = CATEGORY_MAP[cat];
+                        if (containerId) {
+                            renderRankingList(containerId, toolsByCategory[cat], cat);
+                        }
+                    });
+                    return;
+                }
+            } catch (e) {
+                // Supabase 读取失败，使用备用数据
+            }
+        }
+
+        // 备用方案：使用内置数据（无排名）
         Object.keys(FALLBACK_TOOLS).forEach(function(cat) {
             toolsByCategory[cat] = FALLBACK_TOOLS[cat].map(function(t) {
                 return { name: t.name, domain: t.domain, rank: null };
             });
-        });
-
-        // 如果有缓存，先用缓存数据渲染
-        if (hasCache) {
-            Object.keys(toolsByCategory).forEach(function(cat) {
-                toolsByCategory[cat].forEach(function(tool) {
-                    tool.rank = rankingCache[tool.domain] || null;
-                });
-                var containerId = CATEGORY_MAP[cat];
-                if (containerId) {
-                    renderRankingList(containerId, toolsByCategory[cat], cat);
-                }
-            });
-        }
-
-        // 收集所有需要获取排名的域名
-        var allDomains = [];
-        Object.keys(toolsByCategory).forEach(function(cat) {
-            toolsByCategory[cat].forEach(function(tool) {
-                if (rankingCache[tool.domain] === undefined) {
-                    allDomains.push({ category: cat, tool: tool });
-                }
-            });
-        });
-
-        // 如果有新域名需要获取，分批并行获取（优化：从串行改为批量并行）
-        if (allDomains.length > 0) {
-            // 按批次分组
-            for (var i = 0; i < allDomains.length; i += BATCH_SIZE) {
-                var batch = allDomains.slice(i, i + BATCH_SIZE);
-
-                // 并行获取当前批次
-                await Promise.all(batch.map(function(item) {
-                    return fetchRanking(item.tool.domain).then(function(rank) {
-                        item.tool.rank = rank;
-                    });
-                }));
-
-                // 批次间延迟，避免rate limit
-                if (i + BATCH_SIZE < allDomains.length) {
-                    await delay(API_DELAY);
-                }
+            var containerId = CATEGORY_MAP[cat];
+            if (containerId) {
+                renderRankingList(containerId, toolsByCategory[cat], cat);
             }
-
-            // 所有数据获取完毕后，统一渲染所有榜单
-            Object.keys(toolsByCategory).forEach(function(cat) {
-                var containerId = CATEGORY_MAP[cat];
-                if (containerId) {
-                    renderRankingList(containerId, toolsByCategory[cat], cat);
-                }
-            });
-
-            // 保存缓存
-            saveCache();
-        }
+        });
     }
 
     // 初始化
