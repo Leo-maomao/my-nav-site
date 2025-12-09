@@ -1,9 +1,6 @@
-// 定时更新排名 API - 从 Tranco 获取数据存入 Supabase
-// 用法：每天由外部 Cron 服务调用一次 /api/update-rankings
-
+// Cloudflare Worker - 处理 API 请求和静态资源
 const SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1NjY1NTAsImV4cCI6MjA0OTE0MjU1MH0.QE4Yb0ncB3GK8wnAAF1YaSPKKpJJKdQv2hM9BNc8F4U";
-
 const TRANCO_API = 'https://tranco-list.eu/api/ranks/domain/';
 
 // 工具分类配置
@@ -55,7 +52,6 @@ async function fetchTrancoRank(domain) {
   try {
     const response = await fetch(TRANCO_API + domain);
     if (!response.ok) return null;
-
     const data = await response.json();
     if (data.ranks && data.ranks.length > 0) {
       return data.ranks[0].rank;
@@ -71,33 +67,15 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// 更新 Supabase 数据
-async function upsertToSupabase(tools) {
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Prefer': 'resolution=merge-duplicates'
-    },
-    body: JSON.stringify(tools)
-  });
-
-  return response.ok;
-}
-
-export async function onRequest(context) {
+// 更新排名数据到 Supabase
+async function updateRankings() {
   const startTime = Date.now();
   const results = [];
   const errors = [];
 
-  // 遍历所有分类和工具
   for (const [category, tools] of Object.entries(TOOLS_CONFIG)) {
     for (const tool of tools) {
-      // 获取排名
       const rank = await fetchTrancoRank(tool.domain);
-
       if (rank !== null) {
         results.push({
           name: tool.name,
@@ -110,21 +88,29 @@ export async function onRequest(context) {
       } else {
         errors.push(`${tool.name} (${tool.domain}): 获取排名失败`);
       }
-
-      // 避免请求过快
-      await delay(500);
+      await delay(500); // 避免请求过快
     }
   }
 
   // 批量更新到 Supabase
   let dbSuccess = false;
   if (results.length > 0) {
-    dbSuccess = await upsertToSupabase(results);
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(results)
+    });
+    dbSuccess = response.ok;
   }
 
   const duration = ((Date.now() - startTime) / 1000).toFixed(1);
 
-  return new Response(JSON.stringify({
+  return {
     success: dbSuccess,
     message: dbSuccess ? '排名数据更新成功' : '数据库更新失败',
     stats: {
@@ -135,10 +121,25 @@ export async function onRequest(context) {
     },
     errors: errors.length > 0 ? errors : undefined,
     updated_at: new Date().toISOString()
-  }, null, 2), {
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    }
-  });
+  };
 }
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    // 处理更新排名 API
+    if (url.pathname === '/api/update-rankings') {
+      const result = await updateRankings();
+      return new Response(JSON.stringify(result, null, 2), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+
+    // 其他请求返回静态资源
+    return env.ASSETS.fetch(request);
+  }
+};
