@@ -2003,6 +2003,10 @@ function trackEvent(eventName, params) {
 // AI工具榜单模块（从 Supabase 读取预存排名）
 // ========================================
 (function() {
+    // Supabase 配置（Nav 项目）
+    var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
+    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleGNudWJvd3NhcnB4a29ocXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMjYyOTksImV4cCI6MjA3OTgwMjI5OX0.TCGkoBou99fui-cgcpod-b3BaSdq1mg7SFUtR2mIxms";
+
     // 配置
     var RANKING_DISPLAY_COUNT = 5; // 每个榜单显示5个
 
@@ -2162,9 +2166,10 @@ function trackEvent(eventName, params) {
         };
 
         // 尝试从 Supabase 获取数据
-        if (window.db) {
+        if (window.supabase) {
             try {
-                var result = await window.db
+                var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                var result = await db
                     .from('ai_tools')
                     .select('*')
                     .eq('is_active', true)
@@ -2195,7 +2200,7 @@ function trackEvent(eventName, params) {
                     return;
                 }
             } catch (e) {
-                // Supabase 读取失败，使用备用数据
+                console.error('加载排名数据失败:', e);
             }
         }
 
