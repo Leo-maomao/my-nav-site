@@ -121,6 +121,7 @@ async function updateRankings() {
   }
 
   let dbSuccess = false;
+  let dbError = null;
   if (results.length > 0) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools`, {
       method: 'POST',
@@ -133,14 +134,64 @@ async function updateRankings() {
       body: JSON.stringify(results)
     });
     dbSuccess = res.ok;
+    if (!res.ok) {
+      dbError = await res.text();
+    }
   }
 
   return {
     success: dbSuccess,
     message: dbSuccess ? '更新成功' : '数据库更新失败',
     stats: { total: 60, success: results.length, failed: errors.length, duration: `${((Date.now() - startTime) / 1000).toFixed(1)}s` },
-    errors: errors.length > 0 ? errors : undefined
+    errors: errors.length > 0 ? errors : undefined,
+    dbError: dbError
   };
+}
+
+// 快速测试：只获取4个工具的排名
+async function quickTest() {
+  const testTools = [
+    { name: 'ChatGPT', domain: 'chatgpt.com', category: '聊天对话' },
+    { name: 'Midjourney', domain: 'midjourney.com', category: '图片生成' },
+    { name: 'Runway', domain: 'runwayml.com', category: '视频生成' },
+    { name: 'Canva', domain: 'canva.com', category: '设计创作' }
+  ];
+
+  const results = [];
+  for (const tool of testTools) {
+    const rank = await fetchTrancoRank(tool.domain);
+    if (rank !== null) {
+      results.push({
+        name: tool.name,
+        domain: tool.domain,
+        category: tool.category,
+        tranco_rank: rank,
+        is_active: true,
+        updated_at: new Date().toISOString()
+      });
+    }
+  }
+
+  let dbSuccess = false;
+  let dbError = null;
+  if (results.length > 0) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(results)
+    });
+    dbSuccess = res.ok;
+    if (!res.ok) {
+      dbError = await res.text();
+    }
+  }
+
+  return { success: dbSuccess, results, dbError };
 }
 
 // Workers 入口
@@ -150,6 +201,14 @@ export default {
 
     if (url.pathname === '/api/update-rankings') {
       const result = await updateRankings();
+      return new Response(JSON.stringify(result, null, 2), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+
+    // 快速测试接口
+    if (url.pathname === '/api/quick-test') {
+      const result = await quickTest();
       return new Response(JSON.stringify(result, null, 2), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
