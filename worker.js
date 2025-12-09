@@ -3,7 +3,7 @@ const SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleGNudWJvd3NhcnB4a29ocXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMjYyOTksImV4cCI6MjA3OTgwMjI5OX0.TCGkoBou99fui-cgcpod-b3BaSdq1mg7SFUtR2mIxms";
 const TRANCO_API = 'https://tranco-list.eu/api/ranks/domain/';
 
-// AI 工具候选列表（每个分类尽量多，最终取排名前5）
+// AI 工具候选列表（每分类8个，确保能选出前5）
 const TOOLS_CONFIG = {
   '聊天对话': [
     { name: 'ChatGPT', domain: 'chatgpt.com' },
@@ -13,14 +13,7 @@ const TOOLS_CONFIG = {
     { name: 'Character.AI', domain: 'character.ai' },
     { name: 'Poe', domain: 'poe.com' },
     { name: 'You.com', domain: 'you.com' },
-    { name: 'Kimi', domain: 'kimi.moonshot.cn' },
-    { name: '豆包', domain: 'doubao.com' },
-    { name: 'Pi', domain: 'pi.ai' },
-    { name: 'Jasper Chat', domain: 'jasper.ai' },
-    { name: 'HuggingChat', domain: 'huggingface.co' },
-    { name: 'Cohere', domain: 'cohere.com' },
-    { name: 'Replika', domain: 'replika.ai' },
-    { name: 'Chai', domain: 'chai-research.com' }
+    { name: 'HuggingChat', domain: 'huggingface.co' }
   ],
   '图片生成': [
     { name: 'Midjourney', domain: 'midjourney.com' },
@@ -30,14 +23,7 @@ const TOOLS_CONFIG = {
     { name: 'Civitai', domain: 'civitai.com' },
     { name: 'Freepik', domain: 'freepik.com' },
     { name: 'Stability AI', domain: 'stability.ai' },
-    { name: 'NightCafe', domain: 'nightcafe.studio' },
-    { name: 'Playground', domain: 'playground.com' },
-    { name: 'Lexica', domain: 'lexica.art' },
-    { name: 'DreamStudio', domain: 'dreamstudio.ai' },
-    { name: 'Craiyon', domain: 'craiyon.com' },
-    { name: 'Pixlr', domain: 'pixlr.com' },
-    { name: 'Fotor', domain: 'fotor.com' },
-    { name: 'Hotpot', domain: 'hotpot.ai' }
+    { name: 'Pixlr', domain: 'pixlr.com' }
   ],
   '视频生成': [
     { name: 'Runway', domain: 'runwayml.com' },
@@ -47,13 +33,6 @@ const TOOLS_CONFIG = {
     { name: '可灵KLING', domain: 'klingai.com' },
     { name: 'CapCut', domain: 'capcut.com' },
     { name: 'Luma AI', domain: 'lumalabs.ai' },
-    { name: 'Descript', domain: 'descript.com' },
-    { name: 'InVideo', domain: 'invideo.io' },
-    { name: 'Pictory', domain: 'pictory.ai' },
-    { name: 'Fliki', domain: 'fliki.ai' },
-    { name: 'Colossyan', domain: 'colossyan.com' },
-    { name: 'D-ID', domain: 'd-id.com' },
-    { name: 'Elai', domain: 'elai.io' },
     { name: 'Veed', domain: 'veed.io' }
   ],
   '设计创作': [
@@ -63,15 +42,8 @@ const TOOLS_CONFIG = {
     { name: 'Framer', domain: 'framer.com' },
     { name: 'Remove.bg', domain: 'remove.bg' },
     { name: 'Gamma', domain: 'gamma.app' },
-    { name: 'Beautiful.ai', domain: 'beautiful.ai' },
     { name: 'Miro', domain: 'miro.com' },
-    { name: 'Whimsical', domain: 'whimsical.com' },
-    { name: 'Pitch', domain: 'pitch.com' },
-    { name: 'Simplified', domain: 'simplified.com' },
-    { name: 'Designify', domain: 'designify.com' },
-    { name: 'Looka', domain: 'looka.com' },
-    { name: 'Uizard', domain: 'uizard.io' },
-    { name: 'Khroma', domain: 'khroma.co' }
+    { name: 'Beautiful.ai', domain: 'beautiful.ai' }
   ]
 };
 
@@ -142,7 +114,7 @@ async function updateRankings() {
   return {
     success: dbSuccess,
     message: dbSuccess ? '更新成功' : '数据库更新失败',
-    stats: { total: 60, success: results.length, failed: errors.length, duration: `${((Date.now() - startTime) / 1000).toFixed(1)}s` },
+    stats: { total: 32, success: results.length, failed: errors.length, duration: `${((Date.now() - startTime) / 1000).toFixed(1)}s` },
     errors: errors.length > 0 ? errors : undefined,
     dbError: dbError
   };
