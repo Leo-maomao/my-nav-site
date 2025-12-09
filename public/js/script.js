@@ -2229,12 +2229,27 @@ function trackEvent(eventName, params) {
                 var result = await window.db.from('ai_tools').select('*').eq('is_active', true);
                 if (result.data && result.data.length > 0) {
                     useSupabase = true;
+
+                    // 分类名称映射（Supabase可能使用中文分类）
+                    var categoryMapping = {
+                        '聊天对话': 'chat',
+                        '图片生成': 'image',
+                        '视频生成': 'video',
+                        '设计创作': 'design',
+                        // 英文分类名（直接映射）
+                        'chat': 'chat',
+                        'image': 'image',
+                        'video': 'video',
+                        'design': 'design'
+                    };
+
                     // 按分类分组
                     result.data.forEach(function(tool) {
-                        if (!toolsByCategory[tool.category]) {
-                            toolsByCategory[tool.category] = [];
+                        var mappedCategory = categoryMapping[tool.category] || tool.category;
+                        if (!toolsByCategory[mappedCategory]) {
+                            toolsByCategory[mappedCategory] = [];
                         }
-                        toolsByCategory[tool.category].push({
+                        toolsByCategory[mappedCategory].push({
                             name: tool.name,
                             domain: tool.domain,
                             rank: null
