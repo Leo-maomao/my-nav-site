@@ -2215,55 +2215,13 @@ function trackEvent(eventName, params) {
         // 先尝试从缓存加载
         var hasCache = loadCache();
 
-        // 尝试从Supabase获取工具列表
+        // 直接使用内置工具列表（排名数据从 Tranco API 实时获取）
         var toolsByCategory = {};
-        var useSupabase = false;
-
-        if (window.db) {
-            try {
-                var result = await window.db.from('ai_tools').select('*').eq('is_active', true);
-                if (result.data && result.data.length > 0) {
-                    useSupabase = true;
-
-                    // 分类名称映射（Supabase可能使用中文分类）
-                    var categoryMapping = {
-                        '聊天对话': 'chat',
-                        '图片生成': 'image',
-                        '视频生成': 'video',
-                        '设计创作': 'design',
-                        // 英文分类名（直接映射）
-                        'chat': 'chat',
-                        'image': 'image',
-                        'video': 'video',
-                        'design': 'design'
-                    };
-
-                    // 按分类分组
-                    result.data.forEach(function(tool) {
-                        var mappedCategory = categoryMapping[tool.category] || tool.category;
-                        if (!toolsByCategory[mappedCategory]) {
-                            toolsByCategory[mappedCategory] = [];
-                        }
-                        toolsByCategory[mappedCategory].push({
-                            name: tool.name,
-                            domain: tool.domain,
-                            rank: null
-                        });
-                    });
-                }
-            } catch (e) {
-                // Supabase not available, using fallback data
-            }
-        }
-
-        // 如果Supabase不可用，使用备用数据
-        if (!useSupabase) {
-            Object.keys(FALLBACK_TOOLS).forEach(function(cat) {
-                toolsByCategory[cat] = FALLBACK_TOOLS[cat].map(function(t) {
-                    return { name: t.name, domain: t.domain, rank: null };
-                });
+        Object.keys(FALLBACK_TOOLS).forEach(function(cat) {
+            toolsByCategory[cat] = FALLBACK_TOOLS[cat].map(function(t) {
+                return { name: t.name, domain: t.domain, rank: null };
             });
-        }
+        });
 
         // 如果有缓存，先用缓存数据渲染
         if (hasCache) {
