@@ -1,9 +1,8 @@
-// Cloudflare Pages Function - 更新排名数据
+// Cloudflare Worker - 处理 API 请求
 const SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1NjY1NTAsImV4cCI6MjA0OTE0MjU1MH0.QE4Yb0ncB3GK8wnAAF1YaSPKKpJJKdQv2hM9BNc8F4U";
 const TRANCO_API = 'https://tranco-list.eu/api/ranks/domain/';
 
-// 工具分类配置
 const TOOLS_CONFIG = {
   '聊天对话': [
     { name: 'ChatGPT', domain: 'chatgpt.com' },
@@ -52,21 +51,15 @@ async function fetchTrancoRank(domain) {
     const response = await fetch(TRANCO_API + domain);
     if (!response.ok) return null;
     const data = await response.json();
-    if (data.ranks && data.ranks.length > 0) {
-      return data.ranks[0].rank;
-    }
-    return null;
+    return data.ranks?.[0]?.rank || null;
   } catch (e) {
     return null;
   }
 }
 
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+const delay = ms => new Promise(r => setTimeout(r, ms));
 
-// Pages Function 入口
-export async function onRequest(context) {
+async function updateRankings() {
   const startTime = Date.now();
   const results = [];
   const errors = [];
@@ -78,13 +71,13 @@ export async function onRequest(context) {
         results.push({
           name: tool.name,
           domain: tool.domain,
-          category: category,
+          category,
           tranco_rank: rank,
           is_active: true,
           updated_at: new Date().toISOString()
         });
       } else {
-        errors.push(`${tool.name} (${tool.domain}): 获取排名失败`);
+        errors.push(`${tool.name}: 获取失败`);
       }
       await delay(500);
     }
@@ -92,7 +85,7 @@ export async function onRequest(context) {
 
   let dbSuccess = false;
   if (results.length > 0) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -102,26 +95,29 @@ export async function onRequest(context) {
       },
       body: JSON.stringify(results)
     });
-    dbSuccess = response.ok;
+    dbSuccess = res.ok;
   }
 
-  const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-
-  return new Response(JSON.stringify({
+  return {
     success: dbSuccess,
-    message: dbSuccess ? '排名数据更新成功' : '数据库更新失败',
-    stats: {
-      total: Object.values(TOOLS_CONFIG).flat().length,
-      success: results.length,
-      failed: errors.length,
-      duration: `${duration}s`
-    },
-    errors: errors.length > 0 ? errors : undefined,
-    updated_at: new Date().toISOString()
-  }, null, 2), {
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    }
-  });
+    message: dbSuccess ? '更新成功' : '数据库更新失败',
+    stats: { total: 32, success: results.length, failed: errors.length, duration: `${((Date.now() - startTime) / 1000).toFixed(1)}s` },
+    errors: errors.length > 0 ? errors : undefined
+  };
 }
+
+// Workers 入口
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    if (url.pathname === '/api/update-rankings') {
+      const result = await updateRankings();
+      return new Response(JSON.stringify(result, null, 2), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+
+    return env.ASSETS.fetch(request);
+  }
+};
