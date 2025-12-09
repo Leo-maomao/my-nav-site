@@ -2159,12 +2159,16 @@ function trackEvent(eventName, params) {
         var container = document.getElementById(containerId);
         if (!container) return;
 
-        // 过滤掉没有排名的工具，并按排名排序
-        var validTools = tools.filter(function(t) { return t.rank !== null; });
-        validTools.sort(function(a, b) { return a.rank - b.rank; });
+        // 按排名排序：有排名的按数值升序，没排名的放最后
+        var sortedTools = tools.slice().sort(function(a, b) {
+            if (a.rank === null && b.rank === null) return 0;
+            if (a.rank === null) return 1;
+            if (b.rank === null) return -1;
+            return a.rank - b.rank;
+        });
 
-        // 只显示前5个
-        var topTools = validTools.slice(0, RANKING_DISPLAY_COUNT);
+        // 显示前5个
+        var topTools = sortedTools.slice(0, RANKING_DISPLAY_COUNT);
 
         if (topTools.length === 0) {
             container.innerHTML = '<div class="ranking-error"><i class="ri-signal-wifi-off-line"></i>暂无数据</div>';
@@ -2189,7 +2193,8 @@ function trackEvent(eventName, params) {
             html += '    <div class="ranking-name">' + tool.name + '</div>';
             html += '  </div>';
             html += '  <div class="ranking-actions">';
-            html += '    <span class="ranking-global-rank"><i class="ri-global-line"></i> #' + formatGlobalRank(tool.rank) + '</span>';
+            var rankDisplay = tool.rank !== null ? '#' + formatGlobalRank(tool.rank) : '-';
+            html += '    <span class="ranking-global-rank"><i class="ri-global-line"></i> ' + rankDisplay + '</span>';
             html += '    <span class="ranking-visit-btn">访问</span>';
             html += '  </div>';
             html += '</div>';
