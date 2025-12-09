@@ -58,37 +58,30 @@ async function fetchTrancoRank(domain) {
   }
 }
 
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
 async function updateRankings() {
   const startTime = Date.now();
   const results = [];
   const errors = [];
 
-  // 并行获取所有工具的排名（每批5个，避免429）
+  // 串行获取每个工具的排名（避免被限流）
   for (const [category, tools] of Object.entries(TOOLS_CONFIG)) {
-    const batchSize = 5;
-    for (let i = 0; i < tools.length; i += batchSize) {
-      const batch = tools.slice(i, i + batchSize);
-      const batchResults = await Promise.all(
-        batch.map(async (tool) => {
-          const rank = await fetchTrancoRank(tool.domain);
-          return { tool, rank };
-        })
-      );
-
-      for (const { tool, rank } of batchResults) {
-        if (rank !== null) {
-          results.push({
-            name: tool.name,
-            domain: tool.domain,
-            category,
-            tranco_rank: rank,
-            is_active: true,
-            updated_at: new Date().toISOString()
-          });
-        } else {
-          errors.push(`${tool.name}: 获取失败`);
-        }
+    for (const tool of tools) {
+      const rank = await fetchTrancoRank(tool.domain);
+      if (rank !== null) {
+        results.push({
+          name: tool.name,
+          domain: tool.domain,
+          category,
+          tranco_rank: rank,
+          is_active: true,
+          updated_at: new Date().toISOString()
+        });
+      } else {
+        errors.push(`${tool.name}: 获取失败`);
       }
+      await delay(200); // 200ms间隔避免限流
     }
   }
 
