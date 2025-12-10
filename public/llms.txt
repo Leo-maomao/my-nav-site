@@ -1,0 +1,48 @@
+# 毛毛的AI导航站
+
+> 精选100+优质AI工具导航站，帮助用户快速找到最适合的AI工具
+
+## 网站信息
+
+- 名称: 毛毛的AI导航站
+- 网址: https://my-nav-site.leo-maomao.workers.dev/
+- 作者: 毛毛 (Leo-maomao)
+- 更新频率: 每周更新
+
+## 网站内容
+
+本站收录并分类整理了100+款优质AI工具，主要分类包括：
+
+### AI聊天对话
+- ChatGPT - OpenAI开发的对话式AI
+- Claude - Anthropic开发的AI助手
+- Gemini - Google的多模态AI
+- 文心一言 - 百度的AI对话产品
+
+### AI图片生成
+- Midjourney - 领先的AI绘画工具
+- Stable Diffusion - 开源图像生成模型
+- DALL-E - OpenAI的图像生成AI
+- Leonardo AI - 专业AI艺术创作平台
+
+### AI视频生成
+- Runway - AI视频编辑和生成
+- Pika Labs - AI视频创作工具
+- HeyGen - AI数字人视频生成
+
+### 设计创作
+- Canva - 在线设计平台
+- Figma - 协作设计工具
+- Remove.bg - AI背景移除
+
+## 特色功能
+
+1. **AI工具流量榜** - 基于Tranco数据的实时排名
+2. **多分类导航** - 按功能分类快速查找
+3. **RSS资讯轮播** - AI领域最新新闻
+4. **天气仪表盘** - 实时天气信息
+
+## 联系方式
+
+- GitHub: https://github.com/Leo-maomao
+- 博客: https://my-blog-site.leo-maomao.workers.dev/

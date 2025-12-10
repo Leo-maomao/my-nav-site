@@ -1,0 +1,11 @@
+# robots.txt for 毛毛的AI导航站
+# https://my-nav-site.leo-maomao.workers.dev/
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://my-nav-site.leo-maomao.workers.dev/sitemap.xml
+
+# Disallow admin/config pages (if any)
+Disallow: /admin
