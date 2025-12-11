@@ -1,6 +1,6 @@
 // Cloudflare Worker - 处理 API 请求
-const SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleGNudWJvd3NhcnB4a29ocXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMjYyOTksImV4cCI6MjA3OTgwMjI5OX0.TCGkoBou99fui-cgcpod-b3BaSdq1mg7SFUtR2mIxms";
+const SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
 const TRANCO_API = 'https://tranco-list.eu/api/ranks/domain/';
 
 // AI 工具候选列表（每分类8个，确保能选出前5）
@@ -88,7 +88,7 @@ async function updateRankings() {
   let dbSuccess = false;
   let dbError = null;
   if (results.length > 0) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools?on_conflict=domain`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/nav_ai_tools?on_conflict=domain`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ async function quickTest() {
   let dbSuccess = false;
   let dbError = null;
   if (results.length > 0) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/ai_tools?on_conflict=domain`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/nav_ai_tools?on_conflict=domain`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

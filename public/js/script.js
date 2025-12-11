@@ -19,7 +19,7 @@ var DataService = (function() {
 
     // Keys
     var TOOLS_KEY = "tools_data";
-    var FEEDBACK_TABLE = "feedback";
+    var FEEDBACK_TABLE = "nav_feedback";
     var LOCAL_TOOLS_KEY = "nav_tools_data_v1";
     var LOCAL_FEEDBACK_KEY = "site_feedback_data";
 
@@ -1787,7 +1787,7 @@ try {
         logoutBtn.onclick = function() {
              if(confirm("确定要退出管理员模式吗？")) {
                  if (window.DataService) {
-                     var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
+                     var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
                      var SUPABASE_KEY = "sb_publishable_YciLcY3_xL7koCNRhXItoQ_K-78060C"; 
                      var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                      sb.auth.signOut();
@@ -1822,7 +1822,7 @@ try {
              var password = passInput ? passInput.value.trim() : "";
              if (!email || !password) { alert("请输入邮箱和密码"); return; }
 
-             var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
+             var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
              var SUPABASE_KEY = "sb_publishable_YciLcY3_xL7koCNRhXItoQ_K-78060C"; 
              var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -1844,7 +1844,7 @@ try {
     async function checkUser() {
         if (!window.supabase) return;
         
-        var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
+        var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
         var SUPABASE_KEY = "sb_publishable_YciLcY3_xL7koCNRhXItoQ_K-78060C"; 
         var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -1874,7 +1874,7 @@ try {
     function handleLoginTrigger() {
         if (document.body.classList.contains('is-admin')) {
             if(confirm("当前已是管理员模式，是否退出？")) {
-                 var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
+                 var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
                  var SUPABASE_KEY = "sb_publishable_YciLcY3_xL7koCNRhXItoQ_K-78060C"; 
                  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                  sb.auth.signOut();
@@ -2004,7 +2004,7 @@ function trackEvent(eventName, params) {
 // ========================================
 (function() {
     // Supabase 配置（Nav 项目）
-    var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
+    var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
     var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleGNudWJvd3NhcnB4a29ocXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMjYyOTksImV4cCI6MjA3OTgwMjI5OX0.TCGkoBou99fui-cgcpod-b3BaSdq1mg7SFUtR2mIxms";
 
     // 配置
@@ -2170,7 +2170,7 @@ function trackEvent(eventName, params) {
             try {
                 var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 var result = await db
-                    .from('ai_tools')
+                    .from('nav_ai_tools')
                     .select('*')
                     .eq('is_active', true)
                     .not('tranco_rank', 'is', null)
