@@ -184,6 +184,25 @@ export default {
 
   // 定时触发器 - 每天自动更新排名
   async scheduled(event, env, ctx) {
+    // 1. 更新排名数据
     ctx.waitUntil(updateRankings());
+
+    // 2. 健康检查：保持MySite数据库活跃
+    ctx.waitUntil((async () => {
+      try {
+        // 访问MySite数据库（Nav + Blog共用）
+        const MYSITE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
+        const MYSITE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
+
+        await fetch(`${MYSITE_URL}/rest/v1/config?select=count`, {
+          headers: {
+            'apikey': MYSITE_KEY,
+            'Authorization': `Bearer ${MYSITE_KEY}`
+          }
+        });
+      } catch (e) {
+        // 静默失败，不影响主要功能
+      }
+    })());
   }
 };
