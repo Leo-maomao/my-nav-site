@@ -1,8 +1,8 @@
 // Data Service: Encapsulates Database Logic (Supabase)
 var DataService = (function() {
     var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-    // User provided key
-    var SUPABASE_KEY = "sb_publishable_qyuLpuVm3ERyFaef0rq7uw_fJX2zAAM"; 
+    // MySite数据库 Anon Key
+    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM"; 
     
     var supabase = null;
     var useLocalFallback = false;
@@ -1787,8 +1787,8 @@ try {
         logoutBtn.onclick = function() {
              if(confirm("确定要退出管理员模式吗？")) {
                  if (window.DataService) {
-                     var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
-                     var SUPABASE_KEY = "sb_publishable_YciLcY3_xL7koCNRhXItoQ_K-78060C"; 
+                     var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
+                     var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM";
                      var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                      sb.auth.signOut();
                  }
@@ -1822,8 +1822,8 @@ try {
              var password = passInput ? passInput.value.trim() : "";
              if (!email || !password) { alert("请输入邮箱和密码"); return; }
 
-             var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
-             var SUPABASE_KEY = "sb_publishable_YciLcY3_xL7koCNRhXItoQ_K-78060C"; 
+             var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
+             var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM";
              var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
              loginSubmit.textContent = "登录中...";
@@ -1843,9 +1843,9 @@ try {
 
     async function checkUser() {
         if (!window.supabase) return;
-        
-        var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
-        var SUPABASE_KEY = "sb_publishable_YciLcY3_xL7koCNRhXItoQ_K-78060C"; 
+
+        var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
+        var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM";
         var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         var { data: { session } } = await sb.auth.getSession();
@@ -1874,8 +1874,8 @@ try {
     function handleLoginTrigger() {
         if (document.body.classList.contains('is-admin')) {
             if(confirm("当前已是管理员模式，是否退出？")) {
-                 var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
-                 var SUPABASE_KEY = "sb_publishable_YciLcY3_xL7koCNRhXItoQ_K-78060C"; 
+                 var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
+                 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM";
                  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                  sb.auth.signOut();
             }
@@ -2003,9 +2003,9 @@ function trackEvent(eventName, params) {
 // AI工具榜单模块（从 Supabase 读取预存排名）
 // ========================================
 (function() {
-    // Supabase 配置（Nav 项目）
-    var SUPABASE_URL = "https://aexcnubowsarpxkohqvv.supabase.co";
-    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleGNudWJvd3NhcnB4a29ocXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMjYyOTksImV4cCI6MjA3OTgwMjI5OX0.TCGkoBou99fui-cgcpod-b3BaSdq1mg7SFUtR2mIxms";
+    // Supabase 配置（MySite数据库 - Nav + Blog共用）
+    var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
+    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM";
 
     // 配置
     var RANKING_DISPLAY_COUNT = 5; // 每个榜单显示5个
