@@ -192,7 +192,7 @@ export default {
       try {
         // 访问MySite数据库（Nav + Blog共用）
         const MYSITE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-        const MYSITE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM";
+        const MYSITE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
 
         await fetch(`${MYSITE_URL}/rest/v1/config?select=count`, {
           headers: {

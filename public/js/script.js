@@ -2,7 +2,7 @@
 var DataService = (function() {
     var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
     // MySite数据库 Anon Key
-    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM"; 
+    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4"; 
     
     var supabase = null;
     var useLocalFallback = false;
@@ -1788,7 +1788,7 @@ try {
              if(confirm("确定要退出管理员模式吗？")) {
                  if (window.DataService) {
                      var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-                     var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM";
+                     var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
                      var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                      sb.auth.signOut();
                  }
@@ -1823,7 +1823,7 @@ try {
              if (!email || !password) { alert("请输入邮箱和密码"); return; }
 
              var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-             var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM";
+             var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
              var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
              loginSubmit.textContent = "登录中...";
@@ -1845,7 +1845,7 @@ try {
         if (!window.supabase) return;
 
         var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-        var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM";
+        var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
         var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         var { data: { session } } = await sb.auth.getSession();
@@ -1875,7 +1875,7 @@ try {
         if (document.body.classList.contains('is-admin')) {
             if(confirm("当前已是管理员模式，是否退出？")) {
                  var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-                 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM";
+                 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
                  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                  sb.auth.signOut();
             }
@@ -2005,7 +2005,7 @@ function trackEvent(eventName, params) {
 (function() {
     // Supabase 配置（MySite数据库 - Nav + Blog共用）
     var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwNTc4MTIsImV4cCI6MjA0ODYzMzgxMn0.qe_PpxSMHxm3TJUl8LYOaP-A4o7HQlE8tCrr3w5xppM";
+    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
 
     // 配置
     var RANKING_DISPLAY_COUNT = 5; // 每个榜单显示5个
