@@ -1541,7 +1541,7 @@ body.is-config-mode .tool-card-add {
   justify-content: center;
   font-size: 18px;
   z-index: 60;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s ease; /* 添加平滑过渡，配合位置变化 */
 }
 
 .back-to-top:hover {
@@ -1616,10 +1616,121 @@ body.is-config-mode .tool-card-add {
 }
 
 /* Feedback Button Style */
+/* WeChat QR Code Float */
+.wechat-qr-float {
+  position: fixed;
+  right: 22px;
+  bottom: 80px; /* 默认位置：与用户反馈按钮对齐上方 */
+  width: 260px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  z-index: 50;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+}
+
+/* 当回到顶部按钮显示时，微信浮窗上移 */
+.wechat-qr-float.shift-up {
+  bottom: 134px;
+}
+
+.wechat-qr-float.hidden {
+  display: none;
+}
+
+.wechat-qr-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 18px;
+  color: #94a3b8;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.wechat-qr-close:hover {
+  background: rgba(0,0,0,0.08);
+  color: #64748b;
+  border-color: rgba(0,0,0,0.06);
+}
+
+.wechat-qr-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.wechat-qr-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: center;
+}
+
+.wechat-qr-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.wechat-qr-loading {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* WeChat QR Code Button (collapsed state) */
+.wechat-qr-btn {
+  position: fixed;
+  right: 22px;
+  bottom: 80px; /* 默认位置：与用户反馈按钮对齐上方 */
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #07c160;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(7,193,96,0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  z-index: 50;
+  transition: all 0.3s ease;
+  border: 1px solid #06ad56;
+}
+
+/* 当回到顶部按钮显示时，微信按钮上移 */
+.wechat-qr-btn.shift-up {
+  bottom: 134px;
+}
+
+.wechat-qr-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(7,193,96,0.4);
+  background: #06ad56;
+}
+
 .feedback-btn {
   position: fixed;
   right: 22px;
-  bottom: 26px; /* Default position (same as back-to-top) */
+  bottom: 26px; /* 默认位置：与回到顶部按钮相同 */
   width: 40px;
   height: 40px;
   border-radius: 999px;
@@ -1632,10 +1743,14 @@ body.is-config-mode .tool-card-add {
   justify-content: center;
   font-size: 20px;
   z-index: 50;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   border: 1px solid #e2e8f0;
 }
-.feedback-btn.move-up {
+
+/* 当回到顶部按钮显示时，用户反馈按钮上移 */
+.feedback-btn.shift-up {
+  bottom: 80px;
+}
   bottom: 80px; /* Move up when back-to-top appears */
 }
 .feedback-btn:hover {

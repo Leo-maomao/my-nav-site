@@ -1278,12 +1278,19 @@ var DataService = (function() {
 
     function toggle() {
       var feedbackBtn = document.getElementById("feedbackBtn");
+      var wechatQrFloat = document.getElementById("wechatQrFloat");
+      var wechatQrBtn = document.getElementById("wechatQrBtn");
+      
       if (window.scrollY > 260) {
         btn.classList.add("is-visible");
-        if (feedbackBtn) feedbackBtn.classList.add("move-up");
+        if (feedbackBtn) feedbackBtn.classList.add("shift-up");
+        if (wechatQrFloat) wechatQrFloat.classList.add("shift-up");
+        if (wechatQrBtn) wechatQrBtn.classList.add("shift-up");
       } else {
         btn.classList.remove("is-visible");
-        if (feedbackBtn) feedbackBtn.classList.remove("move-up");
+        if (feedbackBtn) feedbackBtn.classList.remove("shift-up");
+        if (wechatQrFloat) wechatQrFloat.classList.remove("shift-up");
+        if (wechatQrBtn) wechatQrBtn.classList.remove("shift-up");
       }
     }
 
@@ -1293,7 +1300,7 @@ var DataService = (function() {
     btn.addEventListener("click", function () {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
-})();
+  })();
 
 // 左侧分组点击后滚动到右侧对应分类
 (function () {
@@ -2218,5 +2225,106 @@ function trackEvent(eventName, params) {
 
     // 初始化
     loadRankings();
+})();
+
+// 微信群二维码浮窗交互
+(function() {
+    var wechatQrFloat = document.getElementById('wechatQrFloat');
+    var wechatQrBtn = document.getElementById('wechatQrBtn');
+    var wechatQrClose = document.getElementById('wechatQrClose');
+    var wechatQrImage = document.getElementById('wechatQrImage');
+    var wechatQrLoading = document.getElementById('wechatQrLoading');
+    
+    if (!wechatQrFloat || !wechatQrBtn || !wechatQrClose) return;
+    
+    // 从数据库加载二维码URL
+    async function loadWechatQrCode() {
+        try {
+            // 使用现有的DataService中的supabase实例
+            var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
+            var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
+            var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            
+            var result = await supabase
+                .from('config')
+                .select('value')
+                .eq('key', 'wechat_qrcode_url')
+                .single();
+            
+            if (result.data && result.data.value) {
+                wechatQrImage.src = result.data.value;
+                wechatQrImage.style.display = 'block';
+                wechatQrLoading.style.display = 'none';
+                wechatQrFloat.style.display = 'block';
+            } else {
+                // 没有配置二维码，不显示浮窗
+                wechatQrFloat.style.display = 'none';
+            }
+        } catch (e) {
+            console.error('加载二维码失败:', e);
+            wechatQrFloat.style.display = 'none';
+        }
+    }
+    
+    // 页面加载时自动加载二维码（延迟执行确保 Supabase SDK 已加载）
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(loadWechatQrCode, 500);
+        });
+    } else {
+        setTimeout(loadWechatQrCode, 500);
+    }
+    
+    // 标记是否已经关闭过一次
+    var hasClosedOnce = false;
+    var hoverTimer = null;
+    
+    // 关闭二维码浮窗
+    wechatQrClose.addEventListener('click', function() {
+        hasClosedOnce = true; // 标记已关闭过
+        wechatQrFloat.style.display = 'none';
+        wechatQrBtn.style.display = 'flex';
+    });
+    
+    // 首次点击按钮显示二维码
+    wechatQrBtn.addEventListener('click', function() {
+        if (!hasClosedOnce) {
+            wechatQrBtn.style.display = 'none';
+            wechatQrFloat.style.display = 'block';
+        }
+    });
+    
+    // 关闭后，hover 到按钮上显示二维码
+    wechatQrBtn.addEventListener('mouseenter', function() {
+        if (hasClosedOnce) {
+            clearTimeout(hoverTimer);
+            wechatQrBtn.style.display = 'none'; // 隐藏按钮
+            wechatQrFloat.style.display = 'block'; // 显示浮窗
+        }
+    });
+    
+    wechatQrBtn.addEventListener('mouseleave', function() {
+        if (hasClosedOnce) {
+            hoverTimer = setTimeout(function() {
+                wechatQrFloat.style.display = 'none';
+                wechatQrBtn.style.display = 'flex'; // 恢复按钮
+            }, 200); // 延迟 200ms，给时间移动到浮窗上
+        }
+    });
+    
+    // 鼠标移到浮窗上时，保持显示
+    wechatQrFloat.addEventListener('mouseenter', function() {
+        if (hasClosedOnce) {
+            clearTimeout(hoverTimer);
+        }
+    });
+    
+    // 鼠标离开浮窗，恢复按钮
+    wechatQrFloat.addEventListener('mouseleave', function() {
+        if (hasClosedOnce) {
+            wechatQrFloat.style.display = 'none';
+            wechatQrBtn.style.display = 'flex';
+        }
+    });
 })();
 
