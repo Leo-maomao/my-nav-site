@@ -1623,13 +1623,46 @@ var DataService = (function() {
     fetchNews();
 })();
 
-// 51.la Init
-try {
-    if (window.LA) {
-        LA.init({id:"3OBuXueXb41ODfzv",ck:"3OBuXueXb41ODfzv"});
+// 51.la Init - 使用队列确保埋点可靠
+var _laInitialized = false;
+var _laEventQueue = [];
+
+function initLA() {
+    if (_laInitialized) return;
+    try {
+        if (window.LA && typeof LA.init === 'function') {
+            LA.init({id:"3OBuXueXb41ODfzv",ck:"3OBuXueXb41ODfzv"});
+            _laInitialized = true;
+            // 处理队列中的事件
+            _laEventQueue.forEach(function(item) {
+                try {
+                    LA.track(item.event, item.params);
+                } catch (e) {}
+            });
+            _laEventQueue = [];
+        }
+    } catch (e) {
+        console.warn('51.la init error:', e);
     }
-} catch (e) {
-    // LA init failed silently
+}
+
+// 尝试立即初始化
+initLA();
+// 如果SDK还没加载完，监听加载完成事件
+if (!_laInitialized) {
+    var laScript = document.getElementById('LA_COLLECT');
+    if (laScript) {
+        laScript.onload = initLA;
+    }
+    // 备用：轮询检查
+    var checkLA = setInterval(function() {
+        if (window.LA) {
+            initLA();
+            clearInterval(checkLA);
+        }
+    }, 100);
+    // 5秒后停止轮询
+    setTimeout(function() { clearInterval(checkLA); }, 5000);
 }
 
 // Feedback Logic & Pagination
@@ -1931,11 +1964,14 @@ try {
 // 51.la 埋点追踪模块
 // ========================================
 
-// 埋点工具函数
+// 埋点工具函数（使用队列确保可靠性）
 function trackEvent(eventName, params) {
     try {
-        if (window.LA && typeof LA.track === 'function') {
+        if (_laInitialized && window.LA && typeof LA.track === 'function') {
             LA.track(eventName, params || {});
+        } else {
+            // SDK还没准备好，加入队列
+            _laEventQueue.push({ event: eventName, params: params || {} });
         }
     } catch (e) {
         // 埋点失败不影响业务
