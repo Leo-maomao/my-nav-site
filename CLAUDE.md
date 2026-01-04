@@ -2,9 +2,51 @@
 
 > **⚠️ 重要提醒：每次 git commit 后必须更新本文档底部的「提交记录」！**
 
-## 51.la 埋点事件
+---
 
-统计ID: `3OBuXueXb41ODfzv`
+## 规范依赖
+
+本项目遵循 `../rules/CLAUDE.md` 及其索引的所有规范文档。
+
+开发前请先阅读总纲，根据当前任务阅读对应的子文档。
+
+---
+
+## 项目架构
+
+### 技术栈
+- **前端**：HTML5 + CSS3 + ES6（原生，无框架）
+- **后端**：Supabase（数据库 + Auth）
+- **部署**：Cloudflare Workers + Pages
+- **统计**：51.la
+
+### 核心模块
+
+| 模块 | 文件 | 职责 |
+|------|------|------|
+| 配置中心 | `config.js` | Supabase 客户端初始化 |
+| 数据服务 | `services/data-service.js` | 工具数据、反馈的 CRUD |
+| 埋点服务 | `services/analytics.js` | 51.la 事件追踪 |
+| 弹窗组件 | `components/modal.js` | 通用 Modal 封装 |
+| 默认数据 | `initial-data.js` | 工具种子数据（含版本号） |
+| 主逻辑 | `script.js` | UI 渲染、交互、天气等 |
+
+### 数据版本机制
+
+工具数据支持版本控制，确保更新时自动覆盖云端旧数据：
+
+1. `initial-data.js` 中定义 `DEFAULT_TOOLS_VERSION`
+2. 页面加载时检测云端数据的 `_version` 字段
+3. 若版本落后，自动用最新默认数据覆盖云端
+4. **更新工具数据时，务必递增版本号**
+
+---
+
+## 项目特有配置
+
+### 51.la 埋点
+
+统计 ID: `3OBuXueXb41ODfzv`
 
 | 事件标识 | 事件名称 | 说明 |
 |---------|---------|------|
@@ -16,12 +58,21 @@
 | `feedback_button_click` | 反馈按钮点击 | 点击反馈浮窗按钮 |
 | `feedback_submit` | 反馈提交 | 提交反馈表单 |
 
+### Supabase 表结构
+
+| 表名 | 用途 | RLS 策略 |
+|------|------|----------|
+| `config` | 存储工具数据等配置 | anon 可读，authenticated 可写 |
+| `feedback` | 用户反馈 | anon 可写，authenticated 可读 |
+| `nav_ai_tools` | AI 工具排名数据 | Worker 写入，前端读取 |
+
 ---
 
 ## 提交记录
 
 | 日期 | Commit | 说明 |
 |-----|--------|------|
+| 2026-01-04 | `9f8f94f` | fix: 工具数据版本控制、登录表单优化、链接修正 |
 | 2025-12-10 | `816de2f` | docs: 更新提交记录 |
 | 2025-12-10 | `f36f75e` | 修复榜单：使用正确的 Supabase 配置读取排名数据 |
 | 2025-12-10 | `98cb5a5` | docs: 更新提交记录 |

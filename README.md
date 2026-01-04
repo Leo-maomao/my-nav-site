@@ -41,16 +41,23 @@
 
 ```text
 nav/
-├── public/                 # 静态资源目录
+├── public/                     # 静态资源目录
 │   ├── css/
-│   │   └── style.css       # 样式文件 (包含了所有组件、响应式布局与动画)
+│   │   └── style.css           # 样式文件 (组件、响应式布局、动画)
 │   ├── js/
-│   │   ├── initial-data.js # 初始化种子数据 (当数据库为空时使用)
-│   │   └── script.js       # 核心逻辑 (Supabase交互、UI渲染、天气、统计等)
-│   └── index.html          # 入口文件
-├── wrangler.toml           # Cloudflare Pages 部署配置
-├── .gitignore              # Git 忽略文件
-└── README.md               # 项目文档
+│   │   ├── config.js           # 应用配置 (Supabase 客户端初始化)
+│   │   ├── initial-data.js     # 默认工具数据 (含版本号，用于云端同步)
+│   │   ├── script.js           # 核心逻辑 (UI渲染、天气、搜索等)
+│   │   ├── services/
+│   │   │   ├── analytics.js    # 51.la 埋点服务
+│   │   │   └── data-service.js # Supabase 数据操作封装
+│   │   └── components/
+│   │       └── modal.js        # 通用弹窗组件
+│   └── index.html              # 入口文件
+├── worker.js                   # Cloudflare Worker (排名更新 API)
+├── wrangler.toml               # Cloudflare 部署配置 (含环境变量)
+├── CLAUDE.md                   # AI 助手项目规范
+└── README.md                   # 项目文档
 ```
 
 ---
@@ -82,10 +89,17 @@ nav/
 4. 获取项目的 `URL` 和 `Anon Key`
 
 ### 2. 配置项目
-修改 `public/js/script.js` 中的 `DataService` 配置：
+修改 `public/js/config.js` 中的 Supabase 配置：
 ```javascript
 var SUPABASE_URL = "https://your-project-id.supabase.co";
 var SUPABASE_KEY = "your-anon-key";
+```
+
+同时更新 `wrangler.toml` 中的环境变量（用于 Worker API）：
+```toml
+[vars]
+SUPABASE_URL = "https://your-project-id.supabase.co"
+SUPABASE_KEY = "your-anon-key"
 ```
 
 ### 3. 部署

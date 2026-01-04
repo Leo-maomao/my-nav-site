@@ -1,7 +1,5 @@
 // Cloudflare Worker - 处理 API 请求
-const SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
-const TRANCO_API = 'https://tranco-list.eu/api/ranks/domain/';
+// 配置从环境变量读取（见 wrangler.toml [vars]）
 
 // AI 工具候选列表（每分类8个，确保能选出前5）
 const TOOLS_CONFIG = {
@@ -47,9 +45,9 @@ const TOOLS_CONFIG = {
   ]
 };
 
-async function fetchTrancoRank(domain) {
+async function fetchTrancoRank(domain, env) {
   try {
-    const response = await fetch(TRANCO_API + domain);
+    const response = await fetch(env.TRANCO_API + domain);
     if (!response.ok) return null;
     const data = await response.json();
     return data.ranks?.[0]?.rank || null;
@@ -60,7 +58,7 @@ async function fetchTrancoRank(domain) {
 
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
-async function updateRankings() {
+async function updateRankings(env) {
   const startTime = Date.now();
   const results = [];
   const errors = [];
@@ -68,7 +66,7 @@ async function updateRankings() {
   // 串行获取每个工具的排名（避免被限流）
   for (const [category, tools] of Object.entries(TOOLS_CONFIG)) {
     for (const tool of tools) {
-      const rank = await fetchTrancoRank(tool.domain);
+      const rank = await fetchTrancoRank(tool.domain, env);
       if (rank !== null) {
         results.push({
           name: tool.name,
@@ -88,12 +86,12 @@ async function updateRankings() {
   let dbSuccess = false;
   let dbError = null;
   if (results.length > 0) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/nav_ai_tools?on_conflict=domain`, {
+    const res = await fetch(`${env.SUPABASE_URL}/rest/v1/nav_ai_tools?on_conflict=domain`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'apikey': env.SUPABASE_KEY,
+        'Authorization': `Bearer ${env.SUPABASE_KEY}`,
         'Prefer': 'resolution=merge-duplicates'
       },
       body: JSON.stringify(results)
@@ -114,7 +112,7 @@ async function updateRankings() {
 }
 
 // 快速测试：只获取4个工具的排名
-async function quickTest() {
+async function quickTest(env) {
   const testTools = [
     { name: 'ChatGPT', domain: 'chatgpt.com', category: '聊天对话' },
     { name: 'Midjourney', domain: 'midjourney.com', category: '图片生成' },
@@ -124,7 +122,7 @@ async function quickTest() {
 
   const results = [];
   for (const tool of testTools) {
-    const rank = await fetchTrancoRank(tool.domain);
+    const rank = await fetchTrancoRank(tool.domain, env);
     if (rank !== null) {
       results.push({
         name: tool.name,
@@ -140,12 +138,12 @@ async function quickTest() {
   let dbSuccess = false;
   let dbError = null;
   if (results.length > 0) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/nav_ai_tools?on_conflict=domain`, {
+    const res = await fetch(`${env.SUPABASE_URL}/rest/v1/nav_ai_tools?on_conflict=domain`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'apikey': env.SUPABASE_KEY,
+        'Authorization': `Bearer ${env.SUPABASE_KEY}`,
         'Prefer': 'resolution=merge-duplicates'
       },
       body: JSON.stringify(results)
@@ -165,7 +163,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/api/update-rankings') {
-      const result = await updateRankings();
+      const result = await updateRankings(env);
       return new Response(JSON.stringify(result, null, 2), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
@@ -173,7 +171,7 @@ export default {
 
     // 快速测试接口
     if (url.pathname === '/api/quick-test') {
-      const result = await quickTest();
+      const result = await quickTest(env);
       return new Response(JSON.stringify(result, null, 2), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
@@ -185,19 +183,15 @@ export default {
   // 定时触发器 - 每天自动更新排名
   async scheduled(event, env, ctx) {
     // 1. 更新排名数据
-    ctx.waitUntil(updateRankings());
+    ctx.waitUntil(updateRankings(env));
 
     // 2. 健康检查：保持MySite数据库活跃
     ctx.waitUntil((async () => {
       try {
-        // 访问MySite数据库（Nav + Blog共用）
-        const MYSITE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-        const MYSITE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
-
-        await fetch(`${MYSITE_URL}/rest/v1/config?select=count`, {
+        await fetch(`${env.SUPABASE_URL}/rest/v1/config?select=count`, {
           headers: {
-            'apikey': MYSITE_KEY,
-            'Authorization': `Bearer ${MYSITE_KEY}`
+            'apikey': env.SUPABASE_KEY,
+            'Authorization': `Bearer ${env.SUPABASE_KEY}`
           }
         });
       } catch (e) {

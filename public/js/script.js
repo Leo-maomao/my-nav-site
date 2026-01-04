@@ -1,145 +1,5 @@
-// Data Service: Encapsulates Database Logic (Supabase)
-var DataService = (function() {
-    var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-    // MySite数据库 Anon Key
-    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4"; 
-    
-    var supabase = null;
-    var useLocalFallback = false;
-
-    try {
-        if (window.supabase) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } else {
-            useLocalFallback = true;
-        }
-    } catch (e) {
-        useLocalFallback = true;
-    }
-
-    // Keys
-    var TOOLS_KEY = "tools_data";
-    var FEEDBACK_TABLE = "feedback";
-    var LOCAL_TOOLS_KEY = "nav_tools_data_v1";
-    var LOCAL_FEEDBACK_KEY = "site_feedback_data";
-
-    // Helper: Check connection or validity
-    async function checkConnection() {
-        if (useLocalFallback) return false;
-        try {
-            var { data, error } = await supabase.from('config').select('key').limit(1);
-            if (error) throw error;
-            return true;
-        } catch (e) {
-            useLocalFallback = true;
-            return false;
-        }
-    }
-
-    // --- Feedback Methods ---
-    async function submitFeedback(content, contact) {
-        if (useLocalFallback) {
-            var list = JSON.parse(localStorage.getItem(LOCAL_FEEDBACK_KEY) || "[]");
-            list.unshift({
-                id: Date.now(),
-                content: content,
-                contact: contact || "无联系方式",
-                created_at: new Date().toISOString()
-            });
-            localStorage.setItem(LOCAL_FEEDBACK_KEY, JSON.stringify(list));
-            alert("反馈已提交 (本地模式)");
-            return;
-        }
-
-        try {
-            var { error } = await supabase
-                .from(FEEDBACK_TABLE)
-                .insert([{ content: content, contact: contact }]);
-            
-            if (error) throw error;
-            alert("反馈已提交成功！");
-        } catch (e) {
-            alert("提交失败，请重试: " + e.message);
-        }
-    }
-
-    async function getFeedback() {
-        if (useLocalFallback) {
-            return JSON.parse(localStorage.getItem(LOCAL_FEEDBACK_KEY) || "[]");
-        }
-
-        try {
-            var { data, error } = await supabase
-                .from(FEEDBACK_TABLE)
-                .select('*')
-                .order('created_at', { ascending: false });
-            
-            if (error) throw error;
-            return data || [];
-        } catch (e) {
-            return [];
-        }
-    }
-
-    // --- Config/Tools Methods ---
-    async function loadToolsData() {
-        var localData = localStorage.getItem(LOCAL_TOOLS_KEY);
-        
-        if (useLocalFallback) {
-            return localData ? JSON.parse(localData) : null;
-        }
-
-        try {
-            var { data, error } = await supabase
-                .from('config')
-                .select('value')
-                .eq('key', TOOLS_KEY)
-                .single();
-
-            if (error && error.code !== 'PGRST116') { 
-                throw error;
-            }
-
-            if (data && data.value) {
-                localStorage.setItem(LOCAL_TOOLS_KEY, JSON.stringify(data.value));
-                return data.value;
-            } else {
-                // DB is empty, try to migrate local data
-                if (localData) {
-                    var parsed = JSON.parse(localData);
-                    await saveToolsData(parsed);
-                    return parsed;
-                }
-            }
-        } catch (e) {
-            return localData ? JSON.parse(localData) : null;
-        }
-        return null;
-    }
-
-    async function saveToolsData(dataJson) {
-        localStorage.setItem(LOCAL_TOOLS_KEY, JSON.stringify(dataJson));
-        if (useLocalFallback) return;
-
-        try {
-            var { error } = await supabase
-                .from('config')
-                .upsert({ key: TOOLS_KEY, value: dataJson });
-            if (error) throw error;
-        } catch (e) {
-            alert("云端同步失败，数据已保存在本地");
-        }
-    }
-
-    // Expose window.DataService for backward compatibility if needed, or just return
-    return {
-        checkConnection: checkConnection,
-        submitFeedback: submitFeedback,
-        getFeedback: getFeedback,
-        loadToolsData: loadToolsData,
-        saveToolsData: saveToolsData
-    };
-})();
+// DataService 和 AnalyticsService 已移至独立模块
+// 参见: js/services/data-service.js 和 js/services/analytics.js
 
 // 顶部时间（翻页时钟）
 (function () {
@@ -525,24 +385,30 @@ var DataService = (function() {
 
     // 默认数据 (Seed Data) - 使用全局变量
     var defaultData = window.DEFAULT_TOOLS_DATA || [];
+    var defaultVersion = window.DEFAULT_TOOLS_VERSION || 1;
 
     // Async Initialization
     var currentData = defaultData;
     
     async function init() {
-        // Load Data (Supabase -> Local)
-        var cloudData = await DataService.loadToolsData();
+        // 加载云端/本地数据
+        var savedData = await DataService.loadToolsData();
+        var savedVersion = (savedData && savedData._version) || 0;
         
-        if (cloudData) {
-            currentData = cloudData;
+        if (savedVersion < defaultVersion) {
+            // 版本落后：用最新默认数据覆盖，附带版本号
+            var dataWithVersion = JSON.parse(JSON.stringify(defaultData));
+            dataWithVersion._version = defaultVersion;
+            currentData = defaultData;
+            await DataService.saveToolsData(dataWithVersion);
+        } else if (savedData) {
+            // 版本一致：使用云端数据（过滤掉 _version 字段）
+            currentData = Array.isArray(savedData) ? savedData : defaultData;
         } else {
-            // First run fallback
             currentData = defaultData;
         }
         
         renderAll(currentData);
-        
-        // Check Connection
         DataService.checkConnection();
     }
     init();
@@ -1357,17 +1223,25 @@ var DataService = (function() {
 
         if (loadingEl) loadingEl.style.display = "flex";
 
-        // 2. 定义数据源 (已移除量子位)
+        // 2. 定义数据源 (多源聚合，确保有图)
         var sources = [
-            // 极客公园：科技深度报道，封面图通常很规范
-            { url: "https://www.geekpark.net/rss", name: "GeekPark", type: "tech_mix" },
-            // IT之家：智能时代频道，Enclosure 字段通常带图
-            { url: "https://www.ithome.com/rss/", name: "ITHome", type: "tech_mix" }
+            // 极客公园：科技深度报道，封面图规范
+            { url: "https://www.geekpark.net/rss", name: "极客公园", type: "tech_mix" },
+            // IT之家：AI 频道，Enclosure 带图
+            { url: "https://www.ithome.com/rss/", name: "IT之家", type: "tech_mix" },
+            // 36Kr：科技商业媒体，图片丰富
+            { url: "https://36kr.com/feed", name: "36氪", type: "tech_mix" },
+            // 少数派：数字生活，图片质量高
+            { url: "https://sspai.com/feed", name: "少数派", type: "tech_mix" },
+            // 爱范儿：消费科技，封面图优质
+            { url: "https://www.ifanr.com/feed", name: "爱范儿", type: "tech_mix" },
+            // 机器之心：AI 专业媒体
+            { url: "https://www.jiqizhixin.com/rss", name: "机器之心", type: "ai_focus" }
         ];
 
-        // 关键词库
-        var aiKeywords = /AI|人工智能|GPT|大模型|OpenAI|Claude|Gemini|Sora|LLM|算力|英伟达|NVIDIA|机器人|深度学习|自动驾驶|脑机接口|黑科技|算法|机器学习|Apple Intelligence|Copilot|DeepSeek|智谱|Kimi|元宝|豆包|通义千问/i;
-        var techGiants = /谷歌|Google|微软|Microsoft|苹果|Apple|华为|Huawei|百度|阿里|腾讯|字节|ByteDance/i;
+        // 关键词库 (扩充 2024-2025 热词)
+        var aiKeywords = /AI|人工智能|GPT|大模型|OpenAI|Claude|Gemini|Sora|LLM|算力|英伟达|NVIDIA|机器人|深度学习|自动驾驶|脑机接口|黑科技|算法|机器学习|Apple Intelligence|Copilot|DeepSeek|智谱|Kimi|元宝|豆包|通义千问|可灵|即梦|Midjourney|Runway|Agent|智能体|Llama|Qwen|GLM|混元|星火|文心|千问|视频生成|图像生成|语音合成/i;
+        var techGiants = /谷歌|Google|微软|Microsoft|苹果|Apple|华为|Huawei|百度|阿里|腾讯|字节|ByteDance|Meta|亚马逊|Amazon|英伟达|NVIDIA|OpenAI|Anthropic|xAI|特斯拉|Tesla|小米|荣耀|OPPO|vivo/i;
 
         var requests = sources.map(function(src) {
             return fetch("https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(src.url))
@@ -1442,8 +1316,8 @@ var DataService = (function() {
             // 4. 排序
             processed.sort(function(a, b) { return b.pubDate - a.pubDate; });
 
-            // 5. 截取前 5 条 (因为前面已经过滤了无图的，所以这里剩下的肯定都是有图的)
-            var finalData = processed.slice(0, 5);
+            // 5. 截取前 8 条 (多源聚合后数量更充足)
+            var finalData = processed.slice(0, 8);
 
             if (finalData.length > 0) {
                 localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), data: finalData }));
@@ -1460,18 +1334,39 @@ var DataService = (function() {
         function useFallback() {
              var fallbackData = [
                 {
-                    title: "OpenAI 2030年或面临2070亿美元缺口",
-                    link: "https://36kr.com/p/3073752934",
-                    image: "https://img.36krcdn.com/hsossms/20251128/v2_6e83e66ba8954a25be9aedab03759650@5888275@ai_oswg1205372oswg1053oswg495_img_png~tplv-1marlgjv7f-ai-v3:600:400:600:400:q70.jpg?x-oss-process=image/format,webp",
-                    description: "OpenAI距离盈利仍然遥遥无期",
+                    title: "DeepSeek-R1 推理模型发布，性能媲美 OpenAI o1",
+                    link: "https://www.deepseek.com",
+                    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=450&fit=crop",
+                    description: "深度求索发布全新推理模型，开源社区再添重磅选手",
                     pubDate: Date.now()
                 },
-                 {
-                    title: "为什么一级市场需要“十年不可证伪”的大赛道？",
-                    link: "https://36kr.com/p/3073579911",
-                    image: "https://img.36krcdn.com/hsossms/20251128/v2_1d640ffb6f04fad87c13b38275@ai_oswg1058153oswg1053oswg495_img_png?x-oss-process=image/format,webp",
-                    description: "当所有人都在喊AI泡沫时，真正的泡沫在哪里？",
+                {
+                    title: "Sora 正式开放，AI 视频生成进入新纪元",
+                    link: "https://openai.com/sora",
+                    image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&h=450&fit=crop",
+                    description: "OpenAI 视频生成模型 Sora 向公众开放使用",
                     pubDate: Date.now() - 3600000
+                },
+                {
+                    title: "Claude 3.5 Sonnet 刷新编程评测记录",
+                    link: "https://anthropic.com",
+                    image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=450&fit=crop",
+                    description: "Anthropic 新模型在代码生成和推理任务上大幅领先",
+                    pubDate: Date.now() - 7200000
+                },
+                {
+                    title: "可灵 AI 视频生成用户突破千万",
+                    link: "https://klingai.kuaishou.com",
+                    image: "https://images.unsplash.com/photo-1536240478700-b869070f9279?w=800&h=450&fit=crop",
+                    description: "快手可灵成为国内最受欢迎的 AI 视频生成工具",
+                    pubDate: Date.now() - 10800000
+                },
+                {
+                    title: "英伟达 CES 发布新一代 AI 芯片",
+                    link: "https://nvidia.com",
+                    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=450&fit=crop",
+                    description: "Blackwell 架构芯片性能提升数倍，AI 算力再创新高",
+                    pubDate: Date.now() - 14400000
                 }
             ];
             initSlider(fallbackData);
@@ -1623,47 +1518,7 @@ var DataService = (function() {
     fetchNews();
 })();
 
-// 51.la Init - 使用队列确保埋点可靠
-var _laInitialized = false;
-var _laEventQueue = [];
-
-function initLA() {
-    if (_laInitialized) return;
-    try {
-        if (window.LA && typeof LA.init === 'function') {
-            LA.init({id:"3OBuXueXb41ODfzv",ck:"3OBuXueXb41ODfzv"});
-            _laInitialized = true;
-            // 处理队列中的事件
-            _laEventQueue.forEach(function(item) {
-                try {
-                    LA.track(item.event, item.params);
-                } catch (e) {}
-            });
-            _laEventQueue = [];
-        }
-    } catch (e) {
-        console.warn('51.la init error:', e);
-    }
-}
-
-// 尝试立即初始化
-initLA();
-// 如果SDK还没加载完，监听加载完成事件
-if (!_laInitialized) {
-    var laScript = document.getElementById('LA_COLLECT');
-    if (laScript) {
-        laScript.onload = initLA;
-    }
-    // 备用：轮询检查
-    var checkLA = setInterval(function() {
-        if (window.LA) {
-            initLA();
-            clearInterval(checkLA);
-        }
-    }, 100);
-    // 5秒后停止轮询
-    setTimeout(function() { clearInterval(checkLA); }, 5000);
-}
+// 51.la 初始化已移至 js/services/analytics.js
 
 // Feedback Logic & Pagination
 (function() {
@@ -1826,12 +1681,8 @@ if (!_laInitialized) {
         logoutBtn.style.display = 'none'; // 默认隐藏
         logoutBtn.onclick = function() {
              if(confirm("确定要退出管理员模式吗？")) {
-                 if (window.DataService) {
-                     var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-                     var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
-                     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                     sb.auth.signOut();
-                 }
+                 var sb = AppConfig.getSupabaseClient();
+                 if (sb) sb.auth.signOut();
              }
         };
         // 插入到最后 (Logout)
@@ -1856,37 +1707,40 @@ if (!_laInitialized) {
     if (loginClose) loginClose.onclick = closeLoginModal;
     if (loginCancel) loginCancel.onclick = closeLoginModal;
 
-    if (loginSubmit) {
-        loginSubmit.onclick = function() {
-             var email = emailInput ? emailInput.value.trim() : "";
-             var password = passInput ? passInput.value.trim() : "";
-             if (!email || !password) { alert("请输入邮箱和密码"); return; }
+    function doLogin() {
+        var email = emailInput ? emailInput.value.trim() : "";
+        var password = passInput ? passInput.value.trim() : "";
+        if (!email || !password) { alert("请输入邮箱和密码"); return; }
 
-             var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-             var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
-             var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        var sb = AppConfig.getSupabaseClient();
+        if (!sb) { alert("服务暂不可用"); return; }
 
-             loginSubmit.textContent = "登录中...";
-             sb.auth.signInWithPassword({
-                email: email,
-                password: password,
-             }).then(function(resp) {
-                 loginSubmit.textContent = "登录";
-                 if (resp.error) {
-                     alert("登录失败: " + resp.error.message);
-                 } else {
-                     closeLoginModal();
-                 }
-             });
-        };
+        loginSubmit.textContent = "登录中...";
+        sb.auth.signInWithPassword({
+            email: email,
+            password: password,
+        }).then(function(resp) {
+            loginSubmit.textContent = "登录";
+            if (resp.error) {
+                alert("登录失败: " + resp.error.message);
+            } else {
+                closeLoginModal();
+            }
+        });
+    }
+
+    // 支持表单提交（回车键或点击登录按钮）
+    var loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            doLogin();
+        });
     }
 
     async function checkUser() {
-        if (!window.supabase) return;
-
-        var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-        var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
-        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        var sb = AppConfig.getSupabaseClient();
+        if (!sb) return;
 
         var { data: { session } } = await sb.auth.getSession();
         updateUI(session);
@@ -1914,10 +1768,8 @@ if (!_laInitialized) {
     function handleLoginTrigger() {
         if (document.body.classList.contains('is-admin')) {
             if(confirm("当前已是管理员模式，是否退出？")) {
-                 var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-                 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
-                 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                 sb.auth.signOut();
+                 var sb = AppConfig.getSupabaseClient();
+                 if (sb) sb.auth.signOut();
             }
         } else {
             if (loginModal) {
@@ -1961,22 +1813,9 @@ if (!_laInitialized) {
 })();
 
 // ========================================
-// 51.la 埋点追踪模块
+// 埋点事件绑定
+// trackEvent 函数来自 js/services/analytics.js
 // ========================================
-
-// 埋点工具函数（使用队列确保可靠性）
-function trackEvent(eventName, params) {
-    try {
-        if (_laInitialized && window.LA && typeof LA.track === 'function') {
-            LA.track(eventName, params || {});
-        } else {
-            // SDK还没准备好，加入队列
-            _laEventQueue.push({ event: eventName, params: params || {} });
-        }
-    } catch (e) {
-        // 埋点失败不影响业务
-    }
-}
 
 // 1. 页面访问埋点 (page_view)
 (function() {
@@ -2046,10 +1885,6 @@ function trackEvent(eventName, params) {
 // AI工具榜单模块（从 Supabase 读取预存排名）
 // ========================================
 (function() {
-    // Supabase 配置（MySite数据库 - Nav + Blog共用）
-    var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
-
     // 配置
     var RANKING_DISPLAY_COUNT = 5; // 每个榜单显示5个
 
@@ -2209,11 +2044,11 @@ function trackEvent(eventName, params) {
         };
 
         // 尝试从 Supabase 获取数据
-        if (window.supabase) {
+        var db = AppConfig.getSupabaseClient();
+        if (db) {
             try {
-                var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 var result = await db
-                    .from('ai_tools')
+                    .from('nav_ai_tools')
                     .select('*')
                     .eq('is_active', true)
                     .not('tranco_rank', 'is', null)
@@ -2243,7 +2078,7 @@ function trackEvent(eventName, params) {
                     return;
                 }
             } catch (e) {
-                console.error('加载排名数据失败:', e);
+                // 静默失败，使用备用数据
             }
         }
 
@@ -2276,10 +2111,11 @@ function trackEvent(eventName, params) {
     // 从数据库加载二维码URL
     async function loadWechatQrCode() {
         try {
-            // 使用现有的DataService中的supabase实例
-            var SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co";
-            var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4";
-            var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            var supabase = AppConfig.getSupabaseClient();
+            if (!supabase) {
+                wechatQrFloat.style.display = 'none';
+                return;
+            }
             
             var result = await supabase
                 .from('config')
@@ -2297,7 +2133,7 @@ function trackEvent(eventName, params) {
                 wechatQrFloat.style.display = 'none';
             }
         } catch (e) {
-            console.error('加载二维码失败:', e);
+            // 静默失败，隐藏浮窗
             wechatQrFloat.style.display = 'none';
         }
     }

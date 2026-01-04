@@ -40,48 +40,51 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="layout">
+<a href="#main-content" class="skip-link">跳转到主要内容</a>
+<div class="layout" role="application">
   <!-- 左侧侧边栏 -->
-  <aside class="sidebar">
-    <div class="side-logo">
+  <aside class="sidebar" role="navigation" aria-label="站点导航">
+    <div class="side-logo" role="banner">
       毛毛的导航站
     </div>
 
     <div class="side-avatar">
       <div class="side-avatar-top">
-        <div class="side-avatar-circle">M</div>
+        <div class="side-avatar-circle" aria-hidden="true">M</div>
         <div class="side-avatar-info">
           <div class="side-avatar-desc">永远相信美好的事即将发生</div>
         </div>
       </div>
-      <div class="side-social-links">
-         <a href="https://my-blog-site.leo-maomao.workers.dev/" class="side-social-item" target="_blank">
-           <i class="ri-book-2-line"></i> 博客
+      <div class="side-social-links" role="group" aria-label="社交链接">
+         <a href="https://my-blog-site.leo-maomao.workers.dev/" class="side-social-item" target="_blank" aria-label="访问博客">
+           <i class="ri-book-2-line" aria-hidden="true"></i> 博客
          </a>
-        <a href="https://my-tools-site.leo-maomao.workers.dev/" class="side-social-item" target="_blank" rel="noopener noreferrer">
-          <i class="ri-tools-line"></i> 工具箱
+        <a href="https://my-tools-site.leo-maomao.workers.dev/" class="side-social-item" target="_blank" rel="noopener noreferrer" aria-label="访问工具箱">
+          <i class="ri-tools-line" aria-hidden="true"></i> 工具箱
         </a>
       </div>
     </div>
 
-    <ul class="side-menu" id="sideMenu">
-      <!-- JS 渲染分类列表 -->
-    </ul>
+    <nav aria-label="工具分类">
+      <ul class="side-menu" id="sideMenu" role="list">
+        <!-- JS 渲染分类列表 -->
+      </ul>
+    </nav>
 
     <!-- 底部管理员工具栏 (默认隐藏) -->
-    <div class="side-footer" id="sideFooter">
-        <div class="side-footer-btn" id="adminFeedbackBtn" title="查看用户反馈" onclick="openAdminFeedback()">
-            <i class="ri-message-3-line"></i>
-        </div>
-        <div class="side-footer-btn" id="configToggleBtn" title="开启/关闭配置模式">
-      <i class="ri-settings-3-line"></i>
-        </div>
+    <div class="side-footer" id="sideFooter" role="toolbar" aria-label="管理员工具">
+        <button class="side-footer-btn" id="adminFeedbackBtn" title="查看用户反馈" onclick="openAdminFeedback()" aria-label="查看用户反馈">
+            <i class="ri-message-3-line" aria-hidden="true"></i>
+        </button>
+        <button class="side-footer-btn" id="configToggleBtn" title="开启/关闭配置模式" aria-label="配置模式开关" aria-pressed="false">
+            <i class="ri-settings-3-line" aria-hidden="true"></i>
+        </button>
     </div>
   </aside>
 
   <!-- 右侧主区域 -->
-  <div class="main">
-    <div class="hero-dashboard">
+  <main class="main" id="main-content" role="main">
+    <div class="hero-dashboard" role="region" aria-label="仪表盘">
       <div class="hero-bg-decor"></div>
       <div class="hero-content">
 
@@ -185,10 +188,10 @@
         </div>
         <div class="search-main">
           <!-- 隐形假输入框：诱导浏览器将自动填充填入这里，从而保护真实的搜索框 -->
-          <div style="position: fixed; top: -9999px; left: -9999px; opacity: 0; pointer-events: none;">
-             <input type="text" name="fake_username_trap" tabindex="-1" aria-hidden="true">
-             <input type="password" name="fake_password_trap" tabindex="-1" aria-hidden="true">
-          </div>
+          <form style="position: fixed; top: -9999px; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true" autocomplete="off">
+             <input type="text" name="fake_username_trap" tabindex="-1">
+             <input type="password" name="fake_password_trap" tabindex="-1">
+          </form>
 
           <input id="searchMainInput" class="search-main-input" type="text" name="site_search_query" autocomplete="off" placeholder="站内 AI 工具搜索" />
           <div class="search-main-icon" id="searchMainButton"><i class="ri-search-line"></i></div>
@@ -254,10 +257,10 @@
     </section>
 
     <!-- 工具分类（搜索下方整块罗列各个类别，数据来自 JS 渲染） -->
-    <section class="tool-layout">
-      <div class="tool-list" id="toolListContainer"></div>
+    <section class="tool-layout" aria-label="AI工具列表">
+      <div class="tool-list" id="toolListContainer" role="list"></div>
     </section>
-  </div>
+  </main>
 </div>
 
 <button class="back-to-top" id="backToTop" aria-label="回到顶部"><i class="ri-arrow-up-line"></i></button>
@@ -326,26 +329,28 @@
 </div>
 
 <!-- Login Modal -->
-<div id="loginModal" class="modal-overlay">
+<div id="loginModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
   <div class="modal-box" style="max-width: 400px;">
     <div class="modal-header">
-      <h3>管理员登录</h3>
-      <i class="ri-close-line modal-close" id="loginModalClose"></i>
+      <h3 id="loginModalTitle">管理员登录</h3>
+      <i class="ri-close-line modal-close" id="loginModalClose" role="button" aria-label="关闭"></i>
     </div>
-    <div class="modal-body">
-      <div class="modal-input-group">
-        <label>邮箱</label>
-        <input id="loginEmail" class="modal-input" placeholder="请输入管理员邮箱" type="email" />
+    <form id="loginForm" autocomplete="on">
+      <div class="modal-body">
+        <div class="modal-input-group">
+          <label for="loginEmail">邮箱</label>
+          <input id="loginEmail" class="modal-input" placeholder="请输入管理员邮箱" type="email" autocomplete="email" />
+        </div>
+        <div class="modal-input-group">
+          <label for="loginPassword">密码</label>
+          <input id="loginPassword" class="modal-input" placeholder="请输入密码" type="password" autocomplete="current-password" />
+        </div>
       </div>
-      <div class="modal-input-group">
-        <label>密码</label>
-        <input id="loginPassword" class="modal-input" placeholder="请输入密码" type="password" />
+      <div class="modal-footer">
+        <button type="button" class="modal-btn cancel" id="loginCancelBtn">取消</button>
+        <button type="submit" class="modal-btn confirm" id="loginSubmitBtn">登录</button>
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="modal-btn cancel" id="loginCancelBtn">取消</button>
-      <button class="modal-btn confirm" id="loginSubmitBtn">登录</button>
-    </div>
+    </form>
   </div>
 </div>
 
@@ -387,6 +392,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!-- 引入分离的 JS 文件 -->
+<script src="js/config.js"></script>
+<script src="js/services/data-service.js"></script>
+<script src="js/services/analytics.js"></script>
+<script src="js/components/modal.js"></script>
 <script src="js/initial-data.js"></script>
 <script src="js/script.js"></script>
 

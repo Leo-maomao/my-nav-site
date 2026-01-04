@@ -1,20 +1,25 @@
 // 默认工具数据 (Seed Data)
+// 版本号：更新工具数据时递增此值，会强制覆盖云端旧数据
+var DEFAULT_TOOLS_VERSION = 3;
+
 var DEFAULT_TOOLS_DATA = [
     {
         key: "text",
         name: "AI文本工具",
         icon: '<i class="ri-file-text-line"></i>',
         items: [
-            { name: "ChatGPT", desc: "OpenAI 官方的多语言对话与写作助手", link: "https://chatgpt.com", icon: "https://chatgpt.com/favicon.ico" },
-            { name: "Claude", desc: "Anthropic 出品的大语言模型，对话体验自然、长文能力强", link: "https://claude.ai", icon: "https://claude.ai/favicon.ico" },
-            { name: "Gemini", desc: "Google 推出的 Gemini 模型，对话、搜索和办公一体", link: "https://gemini.google.com", icon: "https://gemini.google.com/favicon.ico" },
-            { name: "通义千问", desc: "阿里云出品的中文友好大模型，对话、代码、办公一站式", link: "https://tongyi.aliyun.com/qianwen", icon: "https://tongyi.aliyun.com/favicon.ico" },
-            { name: "文心一言", desc: "百度文心大模型的对话入口，支持搜索增强和创作", link: "https://yiyan.baidu.com", icon: "https://yiyan.baidu.com/static/favicon.ico" },
-            { name: "智谱清言", desc: "智谱 AI 的对话产品，基于 GLM 系列模型", link: "https://chatglm.cn", icon: "https://chatglm.cn/favicon.ico" },
-            { name: "讯飞星火", desc: "科大讯飞推出的大模型产品，擅长中文问答和办公场景", link: "https://xinghuo.xfyun.cn", icon: "https://xinghuo.xfyun.cn/favicon.ico" },
-            { name: "Kimi", desc: "Moonshot AI 的长文助手，支持阅读和总结超长内容", link: "https://kimi.moonshot.cn", icon: "https://kimi.moonshot.cn/favicon.ico" },
-            { name: "豆包", desc: "字节跳动推出的智能助理，支持对话、写作和办公", link: "https://www.doubao.com", icon: "https://www.doubao.com/favicon.ico" },
-            { name: "Poe", desc: "Quora 出品的多模型聚合聊天平台，集成多家大模型", link: "https://poe.com", icon: "https://poe.com/favicon.ico" }
+            { name: "ChatGPT", desc: "OpenAI 官方的多语言对话与写作助手，支持 GPT-4o", link: "https://chatgpt.com", icon: "https://chatgpt.com/favicon.ico" },
+            { name: "Claude", desc: "Anthropic 出品的大语言模型，Claude 3.5 长文能力强", link: "https://claude.ai", icon: "https://claude.ai/favicon.ico" },
+            { name: "DeepSeek", desc: "深度求索出品，开源模型性能媲美 GPT-4，价格极低", link: "https://chat.deepseek.com", icon: "https://chat.deepseek.com/favicon.ico" },
+            { name: "Gemini", desc: "Google 推出的 Gemini 2.0 模型，多模态能力领先", link: "https://gemini.google.com", icon: "https://gemini.google.com/favicon.ico" },
+            { name: "Kimi", desc: "Moonshot AI 的长文助手，支持 200 万字超长上下文", link: "https://kimi.moonshot.cn", icon: "https://kimi.moonshot.cn/favicon.ico" },
+            { name: "豆包", desc: "字节跳动推出的智能助理，日活过亿的国民级 AI", link: "https://www.doubao.com", icon: "https://www.doubao.com/favicon.ico" },
+            { name: "通义千问", desc: "阿里云出品，Qwen 系列模型开源领先", link: "https://tongyi.aliyun.com/qianwen", icon: "https://tongyi.aliyun.com/favicon.ico" },
+            { name: "文心一言", desc: "百度文心大模型，深度集成搜索能力", link: "https://yiyan.baidu.com", icon: "https://yiyan.baidu.com/static/favicon.ico" },
+            { name: "腾讯元宝", desc: "腾讯混元大模型对话产品，支持微信生态", link: "https://yuanbao.tencent.com", icon: "https://yuanbao.tencent.com/favicon.ico" },
+            { name: "海螺AI", desc: "MiniMax 出品，擅长角色扮演和创意写作", link: "https://hailuoai.com", icon: "https://hailuoai.com/favicon.ico" },
+            { name: "智谱清言", desc: "智谱 AI 的 GLM-4 对话产品，中文理解优秀", link: "https://chatglm.cn", icon: "https://chatglm.cn/favicon.ico" },
+            { name: "Perplexity", desc: "AI 原生搜索引擎，实时联网回答问题", link: "https://www.perplexity.ai", icon: "https://www.perplexity.ai/favicon.ico" }
         ]
     },
     {
@@ -22,16 +27,16 @@ var DEFAULT_TOOLS_DATA = [
         name: "AI图像工具",
         icon: '<i class="ri-image-line"></i>',
         items: [
-            { name: "Midjourney", desc: "高质量 AI 作画社区，通过 Discord 使用", link: "https://www.midjourney.com", icon: "https://www.midjourney.com/favicon.ico" },
-            { name: "DALL·E", desc: "OpenAI 的图片生成模型，支持 DALL·E 3", link: "https://labs.openai.com", icon: "https://labs.openai.com/favicon.ico" },
-            { name: "Stable Diffusion", desc: "开源图像生成模型生态，支持本地和云端部署", link: "https://stability.ai", icon: "https://stability.ai/favicon.ico" },
-            { name: "文心一格", desc: "百度出品的中文 AI 绘画平台", link: "https://yige.baidu.com", icon: "https://yige.baidu.com/favicon.ico" },
-            { name: "通义万相", desc: "阿里通义系列的图像生成平台", link: "https://wanxiang.aliyun.com", icon: "https://wanxiang.aliyun.com/favicon.ico" },
-            { name: "Civitai", desc: "Stable Diffusion 模型与作品分享社区", link: "https://civitai.com", icon: "https://civitai.com/favicon.ico" },
-            { name: "OpenArt", desc: "多模型在线生图与作品社区", link: "https://openart.ai", icon: "https://openart.ai/favicon.ico" },
-            { name: "NightCafe", desc: "支持多种模型的在线 AI 作画网站", link: "https://creator.nightcafe.studio", icon: "https://creator.nightcafe.studio/favicon.ico" },
-            { name: "Lexica", desc: "基于 Stable Diffusion 的图库和提示词搜索网站", link: "https://lexica.art", icon: "https://lexica.art/favicon.ico" },
-            { name: "Adobe Firefly", desc: "Adobe 推出的生成式图像与设计工具", link: "https://firefly.adobe.com", icon: "https://firefly.adobe.com/favicon.ico" }
+            { name: "Midjourney", desc: "最受欢迎的 AI 绘画工具，V6 画质惊艳", link: "https://www.midjourney.com", icon: "https://www.midjourney.com/favicon.ico" },
+            { name: "DALL·E 3", desc: "OpenAI 图像生成，集成在 ChatGPT 中使用", link: "https://openai.com/dall-e-3", icon: "https://openai.com/favicon.ico" },
+            { name: "Ideogram", desc: "文字渲染能力最强的 AI 绘图工具", link: "https://ideogram.ai", icon: "https://ideogram.ai/favicon.ico" },
+            { name: "Leonardo.AI", desc: "专业级 AI 图像生成平台，模型丰富", link: "https://leonardo.ai", icon: "https://leonardo.ai/favicon.ico" },
+            { name: "Flux", desc: "Black Forest Labs 开源模型，生成质量领先", link: "https://flux1.ai", icon: "https://flux1.ai/favicon.ico" },
+            { name: "可图 Kolors", desc: "快手出品的中文友好图像生成模型", link: "https://kolors.kuaishou.com", icon: "https://kolors.kuaishou.com/favicon.ico" },
+            { name: "通义万相", desc: "阿里通义系列图像生成，支持中文提示词", link: "https://tongyi.aliyun.com/wanxiang", icon: "https://tongyi.aliyun.com/favicon.ico" },
+            { name: "Stable Diffusion", desc: "开源图像生成生态，SD3/SDXL 本地部署", link: "https://stability.ai", icon: "https://stability.ai/favicon.ico" },
+            { name: "Adobe Firefly", desc: "Adobe 官方 AI 生成工具，版权安全", link: "https://firefly.adobe.com", icon: "https://firefly.adobe.com/favicon.ico" },
+            { name: "Civitai", desc: "最大的 SD 模型与 LoRA 分享社区", link: "https://civitai.com", icon: "https://civitai.com/favicon.ico" }
         ]
     },
     {
@@ -39,14 +44,16 @@ var DEFAULT_TOOLS_DATA = [
         name: "AI视频工具",
         icon: '<i class="ri-movie-line"></i>',
         items: [
-            { name: "Runway", desc: "集剪辑、特效和文生视频于一体的 AI 视频平台", link: "https://runwayml.com", icon: "https://runwayml.com/favicon.ico" },
-            { name: "Pika", desc: "支持文生视频、图生视频的创意视频平台", link: "https://pika.art", icon: "https://pika.art/favicon.ico" },
-            { name: "HeyGen", desc: "数字人和口播视频生成平台", link: "https://www.heygen.com", icon: "https://www.heygen.com/favicon.ico" },
-            { name: "Synthesia", desc: "企业级数字人视频生成工具", link: "https://www.synthesia.io", icon: "https://www.synthesia.io/favicon.ico" },
-            { name: "Descript", desc: "集剪辑、配音、转写于一体的音视频编辑工具", link: "https://www.descript.com", icon: "https://www.descript.com/favicon.ico" },
-            { name: "Opus Clip", desc: "长视频智能切片成多条短视频", link: "https://www.opus.pro", icon: "https://www.opus.pro/favicon.ico" },
-            { name: "Veed.io", desc: "在线视频编辑与字幕、特效工具", link: "https://www.veed.io", icon: "https://www.veed.io/favicon.ico" },
-            { name: "CapCut 剪映", desc: "字节出品的短视频剪辑工具，内置多种 AI 能力", link: "https://www.capcut.com", icon: "https://www.capcut.com/favicon.ico" }
+            { name: "Sora", desc: "OpenAI 革命性文生视频模型，电影级画质", link: "https://sora.com", icon: "https://sora.com/favicon.ico" },
+            { name: "可灵 Kling", desc: "快手出品，国产视频生成天花板，支持 5 秒", link: "https://klingai.kuaishou.com", icon: "https://klingai.kuaishou.com/favicon.ico" },
+            { name: "即梦 Jimeng", desc: "字节跳动 AI 视频生成，与剪映深度集成", link: "https://jimeng.jianying.com", icon: "https://jimeng.jianying.com/favicon.ico" },
+            { name: "Vidu", desc: "生数科技出品，国内首个长视频生成模型", link: "https://www.vidu.studio", icon: "https://www.vidu.studio/favicon.ico" },
+            { name: "Runway Gen-3", desc: "专业级 AI 视频生成与特效平台", link: "https://runwayml.com", icon: "https://runwayml.com/favicon.ico" },
+            { name: "Luma Dream Machine", desc: "快速高质量的视频生成工具", link: "https://lumalabs.ai/dream-machine", icon: "https://lumalabs.ai/favicon.ico" },
+            { name: "Pika 2.0", desc: "视频生成新锐，特效和编辑能力强", link: "https://pika.art", icon: "https://pika.art/favicon.ico" },
+            { name: "HeyGen", desc: "数字人和口播视频生成领导者", link: "https://www.heygen.com", icon: "https://www.heygen.com/favicon.ico" },
+            { name: "CapCut 剪映", desc: "字节出品，内置 AI 剪辑和特效", link: "https://www.capcut.com", icon: "https://www.capcut.com/favicon.ico" },
+            { name: "Opus Clip", desc: "长视频智能切片成多条短视频", link: "https://www.opus.pro", icon: "https://www.opus.pro/favicon.ico" }
         ]
     },
     {
@@ -54,14 +61,14 @@ var DEFAULT_TOOLS_DATA = [
         name: "AI音频工具",
         icon: '<i class="ri-headphone-line"></i>',
         items: [
-            { name: "ElevenLabs", desc: "高质量多语种 TTS 配音平台", link: "https://elevenlabs.io", icon: "https://elevenlabs.io/favicon.ico" },
-            { name: "Suno", desc: "输入一句话就能生成完整歌曲的 AI 音乐平台", link: "https://suno.ai", icon: "https://suno.ai/favicon.ico" },
-            { name: "Udio", desc: "专注音乐创作的生成式 AI 工具", link: "https://www.udio.com", icon: "https://www.udio.com/favicon.ico" },
-            { name: "Adobe Podcast", desc: "Adobe 出品的播客录制与音频增强工具", link: "https://podcast.adobe.com", icon: "https://podcast.adobe.com/favicon.ico" },
-            { name: "AIVA", desc: "面向配乐和影视的 AI 作曲平台", link: "https://www.aiva.ai", icon: "https://www.aiva.ai/favicon.ico" },
-            { name: "Krisp", desc: "会议场景的 AI 降噪工具", link: "https://krisp.ai", icon: "https://krisp.ai/favicon.ico" },
-            { name: "Murf AI", desc: "配音和多语言旁白生成平台", link: "https://murf.ai", icon: "https://murf.ai/favicon.ico" },
-            { name: "Voicemod", desc: "变声与实时语音效果工具", link: "https://www.voicemod.net", icon: "https://www.voicemod.net/favicon.ico" }
+            { name: "Suno", desc: "最火的 AI 音乐生成，一句话创作完整歌曲", link: "https://suno.com", icon: "https://suno.com/favicon.ico" },
+            { name: "Udio", desc: "专业级 AI 音乐创作，音质出众", link: "https://www.udio.com", icon: "https://www.udio.com/favicon.ico" },
+            { name: "ElevenLabs", desc: "最逼真的 AI 语音合成与克隆平台", link: "https://elevenlabs.io", icon: "https://elevenlabs.io/favicon.ico" },
+            { name: "海绵音乐", desc: "字节跳动 AI 音乐生成，中文歌词优秀", link: "https://www.haimian.com", icon: "https://www.haimian.com/favicon.ico" },
+            { name: "天工音乐", desc: "昆仑万维出品的中文 AI 音乐创作", link: "https://music.tiangong.cn", icon: "https://music.tiangong.cn/favicon.ico" },
+            { name: "Adobe Podcast", desc: "Adobe 出品的播客录制与音频增强", link: "https://podcast.adobe.com", icon: "https://podcast.adobe.com/favicon.ico" },
+            { name: "Murf AI", desc: "企业级 AI 配音和旁白生成", link: "https://murf.ai", icon: "https://murf.ai/favicon.ico" },
+            { name: "Krisp", desc: "实时 AI 降噪，会议必备", link: "https://krisp.ai", icon: "https://krisp.ai/favicon.ico" }
         ]
     },
     {
@@ -84,14 +91,16 @@ var DEFAULT_TOOLS_DATA = [
         name: "AI编程工具",
         icon: '<i class="ri-code-s-slash-line"></i>',
         items: [
-            { name: "GitHub Copilot", desc: "GitHub 与 OpenAI 联合推出的 AI 编程助手", link: "https://github.com/features/copilot", icon: "https://github.githubassets.com/favicons/favicon.svg" },
-            { name: "Cursor", desc: "基于大模型的下一代编程 IDE", link: "https://cursor.sh", icon: "https://cursor.sh/favicon.ico" },
-            { name: "Codeium", desc: "支持多种编辑器的免费 AI 补全与重构工具", link: "https://codeium.com", icon: "https://codeium.com/favicon.ico" },
-            { name: "Replit", desc: "在线开发环境，支持 AI 生成和补全代码", link: "https://replit.com", icon: "https://replit.com/favicon.ico" },
-            { name: "Tabnine", desc: "老牌 AI 代码补全插件，支持本地与云端模型", link: "https://www.tabnine.com", icon: "https://www.tabnine.com/favicon.ico" },
-            { name: "AWS CodeWhisperer", desc: "亚马逊推出的云原生 AI 编程助手", link: "https://aws.amazon.com/codewhisperer/", icon: "https://aws.amazon.com/favicon.ico" },
-            { name: "JetBrains AI", desc: "JetBrains 全系列 IDE 的内置 AI 助手", link: "https://www.jetbrains.com/ai/", icon: "https://www.jetbrains.com/favicon.ico" },
-            { name: "CodeGeeX", desc: "面向中文和多语言的开源代码大模型工具链", link: "https://codegeex.cn", icon: "https://codegeex.cn/favicon.ico" }
+            { name: "Cursor", desc: "最火的 AI IDE，深度集成 Claude 和 GPT", link: "https://cursor.com", icon: "https://cursor.com/favicon.ico" },
+            { name: "GitHub Copilot", desc: "GitHub 官方 AI 编程助手，支持多模型", link: "https://github.com/features/copilot", icon: "https://github.githubassets.com/favicons/favicon.svg" },
+            { name: "Windsurf", desc: "Codeium 推出的 AI-first IDE，免费强大", link: "https://codeium.com/windsurf", icon: "https://codeium.com/favicon.ico" },
+            { name: "v0.dev", desc: "Vercel 推出的 AI 前端代码生成工具", link: "https://v0.dev", icon: "https://v0.dev/favicon.ico" },
+            { name: "bolt.new", desc: "StackBlitz 出品，对话式全栈开发", link: "https://bolt.new", icon: "https://bolt.new/favicon.ico" },
+            { name: "Replit Agent", desc: "在线 IDE 的 AI 自动开发助手", link: "https://replit.com", icon: "https://replit.com/favicon.ico" },
+            { name: "Amazon Q", desc: "AWS 新一代 AI 开发助手，原 CodeWhisperer", link: "https://aws.amazon.com/q/", icon: "https://aws.amazon.com/favicon.ico" },
+            { name: "JetBrains AI", desc: "JetBrains 全家桶内置 AI 助手", link: "https://www.jetbrains.com/ai/", icon: "https://www.jetbrains.com/favicon.ico" },
+            { name: "Codeium", desc: "免费的 AI 代码补全，支持多编辑器", link: "https://codeium.com", icon: "https://codeium.com/favicon.ico" },
+            { name: "通义灵码", desc: "阿里云 AI 编程助手，中文友好", link: "https://tongyi.aliyun.com/lingma", icon: "https://tongyi.aliyun.com/favicon.ico" }
         ]
     },
     {
@@ -104,7 +113,7 @@ var DEFAULT_TOOLS_DATA = [
             { name: "Framer", desc: "可视化建站工具，支持 AI 一键生成网站", link: "https://www.framer.com", icon: "https://www.framer.com/favicon.ico" },
             { name: "Uizard", desc: "支持草图转界面的原型设计工具", link: "https://uizard.io", icon: "https://uizard.io/favicon.ico" },
             { name: "Visily", desc: "面向产品和运营的低门槛原型设计工具", link: "https://www.visily.ai", icon: "https://www.visily.ai/favicon.ico" },
-            { name: "Diagram", desc: "Figma 生态中的 AI 设计助手", link: "https://diagram.com", icon: "https://diagram.com/favicon.ico" }
+            { name: "Figma AI", desc: "Figma 官方内置的 AI 设计功能（原 Diagram）", link: "https://www.figma.com/ai", icon: "https://www.figma.com/favicon.ico" }
         ]
     },
     {
