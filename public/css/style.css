@@ -261,6 +261,15 @@ a {
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.05);
 }
 
+.side-social-item:active {
+  transform: translateX(1px) scale(0.98);
+}
+
+.side-social-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .side-social-item svg {
     display: none; /* 隐藏可能残留的 svg */
 }
@@ -326,6 +335,15 @@ a {
 
 .side-menu li:hover::before {
   transform: translateY(-50%) scaleY(1);
+}
+
+.side-menu li:active {
+  transform: translateX(2px) scale(0.98);
+}
+
+.side-menu li:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* 选中/激活状态 */
@@ -409,6 +427,16 @@ a {
     border-color: rgba(37, 99, 235, 0.1);
     transform: translateY(-2px);
 }
+
+.side-footer-btn:active {
+    transform: translateY(0) scale(0.95);
+    background: #dbeafe;
+}
+
+.side-footer-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
 .side-footer-btn.is-active {
     background: #2563eb;
     color: #ffffff;
@@ -450,6 +478,15 @@ a {
 .nav-card-common:hover {
   transform: translateY(-4px);
   box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.25);
+}
+
+.nav-card-common:active {
+  transform: translateY(-2px) scale(0.99);
+}
+
+.nav-card-common:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* 卡片遮罩，保证文字清晰 */
@@ -1128,6 +1165,13 @@ body.is-config-mode .sidebar-item-actions {
   background: rgba(0,0,0,0.05);
   color: #334155;
 }
+.sidebar-action-btn:active {
+  transform: scale(0.92);
+}
+.sidebar-action-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
 .sidebar-action-btn.delete:hover {
   color: #ef4444;
   background: rgba(239, 68, 68, 0.1);
@@ -1153,6 +1197,16 @@ body.is-config-mode .sidebar-add-btn {
   border-color: #2563eb;
   color: #2563eb;
   background: rgba(37, 99, 235, 0.05);
+}
+
+.sidebar-add-btn:active {
+  transform: scale(0.97);
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.sidebar-add-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* 工具卡片编辑控件 */
@@ -1189,9 +1243,19 @@ body.is-config-mode .tool-card-actions {
   color: #2563eb;
   border-color: #2563eb;
 }
+.tool-action-btn:active {
+  transform: scale(0.92);
+}
+.tool-action-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
 .tool-action-btn.delete:hover {
   color: #ef4444;
   border-color: #ef4444;
+}
+.tool-action-btn.delete:focus-visible {
+  outline-color: var(--danger);
 }
 
 /* 添加工具卡片 */
@@ -1215,6 +1279,16 @@ body.is-config-mode .tool-card-add {
   border-color: #2563eb;
   color: #2563eb;
   background: rgba(37, 99, 235, 0.02);
+}
+
+.tool-card-add:active {
+  transform: scale(0.98);
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.tool-card-add:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .search-section {
@@ -1443,6 +1517,12 @@ body.is-config-mode .tool-card-add {
   box-shadow: 0 6px 16px rgba(37, 99, 235, 0.1);
 }
 
+/* 聚焦状态 - 键盘导航 */
+.tool-card:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .tool-card.tool-card-highlight {
   border-color: var(--accent);
   background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
@@ -1554,6 +1634,15 @@ body.is-config-mode .tool-card-add {
   color: #64748b;
 }
 
+.modal-close:active {
+  transform: scale(0.9);
+}
+
+.modal-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .modal-body {
   padding: 24px;
   display: flex;
@@ -1632,6 +1721,37 @@ body.is-config-mode .tool-card-add {
   background: #dc2626;
 }
 
+/* 按钮 active 状态 */
+.modal-btn:active {
+  transform: scale(0.97);
+}
+.modal-btn.confirm:active {
+  background: #1e40af;
+}
+.modal-btn.danger:active {
+  background: #b91c1c;
+}
+.modal-btn.cancel:active {
+  background: #e2e8f0;
+}
+
+/* 按钮 focus-visible 状态 */
+.modal-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.modal-btn.danger:focus-visible {
+  outline-color: var(--danger);
+}
+
+/* 按钮 disabled 状态 */
+.modal-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* 仅当没有图片（回退到首字母）时，才应用背景色，这里通过JS逻辑辅助控制或者CSS选择器 */
 .tool-card-icon.has-fallback {
    background: linear-gradient(135deg, #4f46e5, #6366f1);
@@ -1683,6 +1803,11 @@ body.is-config-mode .tool-card-add {
 .back-to-top:active {
   transform: translateY(-1px) scale(0.98);
   box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+}
+
+.back-to-top:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .back-to-top.is-visible {
@@ -1863,6 +1988,16 @@ body.is-config-mode .tool-card-add {
   background: #06ad56;
 }
 
+.wechat-qr-btn:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 8px rgba(7,193,96,0.3);
+}
+
+.wechat-qr-btn:focus-visible {
+  outline: 2px solid #07c160;
+  outline-offset: 2px;
+}
+
 .feedback-btn {
   position: fixed;
   right: 22px;
@@ -1901,6 +2036,11 @@ body.is-config-mode .tool-card-add {
 .feedback-btn:active {
   transform: translateY(-1px) scale(0.98);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.feedback-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Feedback List Style */
@@ -1987,6 +2127,11 @@ body.is-config-mode .tool-card-add {
   border-color: rgba(37, 99, 235, 0.15);
 }
 
+.ranking-card:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .ranking-card-header {
   display: flex;
   align-items: center;
@@ -2049,6 +2194,12 @@ body.is-config-mode .tool-card-add {
 
 .ranking-item:hover {
   background: linear-gradient(to right, #f8fafc, #f1f5f9);
+}
+
+.ranking-item:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 8px;
 }
 
 .ranking-rank {
