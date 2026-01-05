@@ -1861,46 +1861,80 @@ body.is-config-mode .tool-card-add {
 }
 
 
-/* 回到顶部按钮 */
+/* ============================================
+   FAB 悬浮操作按钮 - 通用样式
+   ============================================ */
 
-.back-to-top {
+.fab {
+  --fab-size: 2.625rem;
+  --fab-right: 1.375rem;
+  --fab-bottom: 1.625rem;
+  --fab-bg: var(--bg-secondary);
+  --fab-border: var(--border-color);
+  --fab-color: var(--text-tertiary);
+  --fab-hover-bg: var(--color-primary);
+  --fab-hover-border: var(--color-primary);
+  --fab-hover-color: var(--text-inverse);
+  --fab-shadow: var(--shadow-md);
+  --fab-hover-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+  
   position: fixed;
-  right: 1.375rem;
-  bottom: 1.625rem;
-  width: 2.625rem;
-  height: 2.625rem;
-  border-radius: var(--radius-full);
-  border: none;
-  background: var(--color-primary);
-  color: var(--text-inverse);
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-  display: none;
+  right: var(--fab-right);
+  bottom: var(--fab-bottom);
+  z-index: 100;
+  display: flex;
   align-items: center;
   justify-content: center;
+  width: var(--fab-size);
+  height: var(--fab-size);
+  padding: 0;
+  background-color: var(--fab-bg);
+  border: 1px solid var(--fab-border);
+  border-radius: var(--radius-full);
+  box-shadow: var(--fab-shadow);
+  color: var(--fab-color);
   font-size: 1.125rem;
-  z-index: 60;
+  cursor: pointer;
   transition: all var(--duration-normal) var(--ease-default);
 }
 
-.back-to-top:hover {
+.fab:hover {
+  background-color: var(--fab-hover-bg);
+  border-color: var(--fab-hover-border);
+  color: var(--fab-hover-color);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
-  background: var(--color-primary-dark);
+  box-shadow: var(--fab-hover-shadow);
 }
 
-.back-to-top:active {
-  transform: translateY(0) scale(0.98);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+.fab:active {
+  transform: translateY(0) scale(0.97);
 }
 
-.back-to-top:focus-visible {
-  outline: 2px solid var(--color-primary);
+.fab:focus-visible {
+  outline: 2px solid var(--fab-hover-bg);
   outline-offset: 2px;
 }
 
+/* ============================================
+   Back to Top 回到顶部按钮
+   ============================================ */
+
+.back-to-top {
+  --fab-bottom: 1.625rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+}
+
+/* 显示状态 */
 .back-to-top.is-visible {
-  display: flex;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top.is-visible:hover {
+  transform: translateY(-2px);
 }
 
 /* Custom Scrollbar for modal inputs */
@@ -2045,89 +2079,38 @@ body.is-config-mode .tool-card-add {
   font-size: 14px;
 }
 
-/* WeChat QR Code Button (collapsed state) */
+/* ============================================
+   WeChat 微信按钮
+   ============================================ */
+
 .wechat-qr-btn {
-  position: fixed;
-  right: 1.375rem;
-  bottom: 5rem;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--radius-full);
-  background: #07c160;
-  color: var(--text-inverse);
-  box-shadow: 0 4px 12px rgba(7,193,96,0.3);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
+  --fab-bottom: 5rem;
+  --fab-bg: #07c160;
+  --fab-border: #06ad56;
+  --fab-color: var(--text-inverse);
+  --fab-hover-bg: #06ad56;
+  --fab-hover-border: #06ad56;
+  --fab-hover-color: var(--text-inverse);
+  --fab-shadow: 0 4px 12px rgba(7, 193, 96, 0.25);
+  --fab-hover-shadow: 0 8px 16px rgba(7, 193, 96, 0.35);
   z-index: 50;
-  transition: all var(--duration-normal) var(--ease-default);
-  border: 1px solid #06ad56;
 }
 
 .wechat-qr-btn.shift-up {
-  bottom: 8.375rem;
+  --fab-bottom: 8.375rem;
 }
 
-.wechat-qr-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(7,193,96,0.4);
-  background: #06ad56;
-}
-
-.wechat-qr-btn:active {
-  transform: translateY(0) scale(0.97);
-  box-shadow: 0 2px 8px rgba(7,193,96,0.3);
-}
-
-.wechat-qr-btn:focus-visible {
-  outline: 2px solid #07c160;
-  outline-offset: 2px;
-}
+/* ============================================
+   Feedback 反馈按钮
+   ============================================ */
 
 .feedback-btn {
-  position: fixed;
-  right: 1.375rem;
-  bottom: 1.625rem;
-  width: 2.625rem;
-  height: 2.625rem;
-  border-radius: var(--radius-full);
-  background: var(--bg-secondary);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--text-tertiary);
-  box-shadow: var(--shadow-md);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
+  --fab-bottom: 1.625rem;
   z-index: 50;
-  transition: all var(--duration-normal) var(--ease-default);
-  border: 1px solid var(--border-color);
 }
 
 .feedback-btn.shift-up {
-  bottom: 5rem;
-}
-
-.feedback-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  color: var(--color-primary);
-  border-color: var(--color-primary-ring);
-  background: var(--bg-secondary);
-}
-
-.feedback-btn:active {
-  transform: translateY(0) scale(0.98);
-  box-shadow: var(--shadow-sm);
-}
-
-.feedback-btn:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  --fab-bottom: 5rem;
 }
 
 /* Feedback List Style */
@@ -2689,18 +2672,25 @@ body.is-config-mode .tool-card-add {
     max-width: none;
     margin: 16px;
   }
-  .back-to-top,
-  .feedback-btn,
-  .wechat-qr-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
-    right: 16px;
-    bottom: 20px;
+  .fab {
+    --fab-size: 2.25rem;
+    --fab-right: 1rem;
+    font-size: 1rem;
   }
-  .feedback-btn.shift-up,
+  .back-to-top {
+    --fab-bottom: 1.25rem;
+  }
+  .feedback-btn {
+    --fab-bottom: 1.25rem;
+  }
+  .feedback-btn.shift-up {
+    --fab-bottom: 4rem;
+  }
+  .wechat-qr-btn {
+    --fab-bottom: 4rem;
+  }
   .wechat-qr-btn.shift-up {
-    bottom: 64px;
+    --fab-bottom: 6.75rem;
   }
   .wechat-qr-float {
     width: 240px;
