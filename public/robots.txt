@@ -1,11 +1,8 @@
-# robots.txt for 毛毛的AI导航站
-# https://my-nav-site.leo-maomao.workers.dev/
+# robots.txt for AI智能导航站
+# TODO: 替换为你的域名
+# https://your-domain.com/
 
 User-agent: *
 Allow: /
 
-# Sitemap
-Sitemap: https://my-nav-site.leo-maomao.workers.dev/sitemap.xml
-
-# Disallow admin/config pages (if any)
-Disallow: /admin
+Sitemap: https://your-domain.com/sitemap.xml

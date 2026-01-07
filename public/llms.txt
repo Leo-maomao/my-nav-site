@@ -1,12 +1,12 @@
-# 毛毛的AI导航站
+# AI智能导航站
 
 > 精选100+优质AI工具导航站，帮助用户快速找到最适合的AI工具
 
 ## 网站信息
 
-- 名称: 毛毛的AI导航站
-- 网址: https://my-nav-site.leo-maomao.workers.dev/
-- 作者: 毛毛 (Leo-maomao)
+- 名称: AI智能导航站
+- 网址: https://your-domain.com/
+- 作者: Your Name
 - 更新频率: 每周更新
 
 ## 网站内容
@@ -44,5 +44,5 @@
 
 ## 联系方式
 
-- GitHub: https://github.com/Leo-maomao
-- 博客: https://my-blog-site.leo-maomao.workers.dev/
+- GitHub: https://github.com/your-username
+- 博客: https://your-blog-domain.com/
