@@ -11,8 +11,9 @@ crons = ["0 0 * * *"]
 
 # 环境变量配置
 # 注意：Supabase anon key 设计为公开使用，安全性依赖 RLS 策略
+# TODO: 替换为你自己的配置
 [vars]
-SUPABASE_URL = "https://jqsmoygkbqukgnwzkxvq.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc21veWdrYnF1a2dud3preHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Mjk0MzYsImV4cCI6MjA4MDMwNTQzNn0.RrGVhh2TauEmGE4Elc2f3obUmZKHVdYVVMaz2kxKlW4"
+SUPABASE_URL = "https://your-project-id.supabase.co"
+SUPABASE_KEY = "your-supabase-anon-key"
 TRANCO_API = "https://tranco-list.eu/api/ranks/domain/"
 

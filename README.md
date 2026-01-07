@@ -1,8 +1,8 @@
 # AI 智能导航站 Pro 🚀
 
-> **"永远相信美好的事即将发生。"**
+> 一个为 AI 时代打造的现代化、响应式、云端同步的个人导航与仪表盘系统
 
-这是一个为 AI 时代打造的**现代化、响应式、云端同步**的个人导航与仪表盘系统。它不仅是一个网址收藏夹，更是一个集成了实时资讯、天气、时间管理、访客分析与用户反馈的智能主页。
+这是一个开源的个人导航站模板。它不仅是一个网址收藏夹，更是一个集成了实时资讯、天气、时间管理、访客分析与用户反馈的智能主页。
 
 本项目基于 **HTML5/CSS3/ES6** 构建，引入 **Supabase** 作为后端数据库，实现了配置信息的云端同步与用户反馈的实时收集，同时保持了静态部署的轻量级特性。
 
@@ -112,7 +112,7 @@ SUPABASE_KEY = "your-anon-key"
 1. 确保 GitHub 仓库设置中已启用：
    - **Settings → Pages → Source** 选择 `GitHub Actions`
 2. 每次 push 到 `main` 分支，自动部署
-3. 部署成功后，访问：`https://leo-maomao.github.io/my-nav-site/`
+3. 部署成功后，访问：`https://your-username.github.io/my-nav-site/`
 
 #### 方式二：Cloudflare Pages
 通过 Git 仓库自动部署：
@@ -153,4 +153,10 @@ wrangler pages deploy public --project-name=my-nav-site
 
 ---
 
-© 2025 毛毛的导航站 | Built with ❤️ using Cursor & Gemini
+## 📄 许可证
+
+MIT License
+
+---
+
+*本项目基于 [my-nav-site](https://github.com/your-username/my-nav-site) 模板创建*
