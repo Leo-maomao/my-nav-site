@@ -12,9 +12,6 @@
 Network Trash Folder
 Temporary Items
 
-# Claude Code - 保留 ui-ux-pro-max-skill
-# .claude/  # 不忽略，需要提交 ui-ux-pro-max-skill
-
 # Environment variables
 .env
 .env.local

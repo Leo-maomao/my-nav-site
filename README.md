@@ -56,7 +56,6 @@ nav/
 │   └── index.html              # 入口文件
 ├── worker.js                   # Cloudflare Worker (排名更新 API)
 ├── wrangler.toml               # Cloudflare 部署配置 (含环境变量)
-├── CLAUDE.md                   # AI 助手项目规范
 └── README.md                   # 项目文档
 ```
 
